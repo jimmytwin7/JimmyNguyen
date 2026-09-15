@@ -35,10 +35,10 @@ export default function HomePage() {
               View Resume
             </Link>
             <Link
-              href="/projects"
+              href="/travel"
               className="inline-flex items-center px-5 py-2.5 rounded-lg font-medium border border-gray-300 text-gray-700 hover:border-gray-400"
             >
-              See Projects
+              Travel Map Project
             </Link>
             <a
               href="https://github.com/jimmytwin7"
