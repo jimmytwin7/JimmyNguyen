@@ -19,9 +19,12 @@ export default function HomePage() {
           >
             <Typewriter text="Hi, I'm Jimmy Nguyen" />
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mb-8 leading-relaxed">
-            Software engineer who loves building clean, fast web experiences and
-            exploring the world one city at a time.
+          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mb-8 leading-relaxed min-h-[3.5em]">
+            <Typewriter
+              text="Software engineer who loves building clean, fast web experiences and exploring the world one city at a time."
+              speed={25}
+              startDelay={3000}
+            />
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
@@ -38,7 +41,7 @@ export default function HomePage() {
               See Projects
             </Link>
             <a
-              href="https://github.com/jimmynguyen"
+              href="https://github.com/jimmytwin7"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center px-5 py-2.5 rounded-lg font-medium border border-gray-300 text-gray-700 hover:border-gray-400"

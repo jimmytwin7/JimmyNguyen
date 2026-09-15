@@ -1,5 +1,5 @@
-const GITHUB_URL = "https://github.com/jimmynguyen";
-const LINKEDIN_URL = "https://www.linkedin.com/in/jimmynguyen";
+const GITHUB_URL = "https://github.com/jimmytwin7";
+const LINKEDIN_URL = "https://www.linkedin.com/in/jimmytnguyen7";
 
 export default function Footer() {
   const year = new Date().getFullYear();

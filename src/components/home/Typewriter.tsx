@@ -7,13 +7,21 @@ interface TypewriterProps {
   text: string;
   /** Milliseconds per character. Higher = slower. */
   speed?: number;
+  /** Wait this many ms after mount before typing begins (e.g. to follow another line). */
+  startDelay?: number;
 }
 
-export default function Typewriter({ text, speed = 140 }: TypewriterProps) {
+export default function Typewriter({
+  text,
+  speed = 140,
+  startDelay = 0,
+}: TypewriterProps) {
   // Start with the full text so SSR and the first client render match (no
   // hydration mismatch) and it's readable if JS is slow/off.
   const [count, setCount] = useState(text.length);
   const [animate, setAnimate] = useState(false);
+  // Gate typing until the start delay has elapsed.
+  const [started, setStarted] = useState(false);
 
   // Enable the animation only after mount, and only if motion is allowed.
   useEffect(() => {
@@ -23,15 +31,17 @@ export default function Typewriter({ text, speed = 140 }: TypewriterProps) {
     if (reduce) return;
     setCount(0);
     setAnimate(true);
-  }, []);
+    const t = setTimeout(() => setStarted(true), startDelay);
+    return () => clearTimeout(t);
+  }, [startDelay]);
 
   useEffect(() => {
-    if (!animate) return;
+    if (!animate || !started) return;
     // Type once, character by character. No loop — stops when complete.
     if (count >= text.length) return;
     const t = setTimeout(() => setCount((c) => c + 1), speed);
     return () => clearTimeout(t);
-  }, [animate, count, text.length, speed]);
+  }, [animate, started, count, text.length, speed]);
 
   const shown = text.slice(0, count);
   const typing = animate && count < text.length;
