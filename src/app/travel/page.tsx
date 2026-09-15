@@ -1,12 +1,14 @@
-import { destinations } from '@/lib/data/destinations';
-import DestinationGrid from '@/components/travel/DestinationGrid';
+import { loadTravelLocations } from "@/lib/travel/loader";
+import TravelMapClient from "@/components/travel/TravelMapClient";
 
 export const metadata = {
-  title: 'Travel — Jimmy Nguyen',
-  description: 'Destinations visited and travel stories from Jimmy Nguyen.',
+  title: "Travel — Jimmy Nguyen",
+  description: "An interactive map of the places Jimmy Nguyen has traveled.",
 };
 
-export default function TravelPage() {
+export default async function TravelPage() {
+  const locations = await loadTravelLocations();
+
   return (
     <div className="space-y-8">
       <header>
@@ -14,11 +16,11 @@ export default function TravelPage() {
           Travel
         </h1>
         <p className="text-gray-600 text-lg">
-          {destinations.length} destinations visited
+          {locations.length} places so far. Click a pin to zoom in.
         </p>
       </header>
 
-      <DestinationGrid destinations={destinations} />
+      <TravelMapClient locations={locations} />
     </div>
   );
 }

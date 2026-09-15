@@ -1,12 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+
+/** Routes where the cursor dot is hidden (e.g. the interactive map). */
+const DISABLED_ROUTES = ["/travel"];
 
 export default function CursorDot() {
+  const pathname = usePathname();
+  const disabled = DISABLED_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+
   const dotRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (disabled) return;
     // Skip on touch / no fine pointer devices
     if (!window.matchMedia("(pointer: fine)").matches) return;
     // Respect users who prefer reduced motion — don't show the dot at all
@@ -39,7 +49,9 @@ export default function CursorDot() {
       window.removeEventListener("mouseleave", hide);
       window.removeEventListener("mouseenter", show);
     };
-  }, []);
+  }, [disabled]);
+
+  if (disabled) return null;
 
   return (
     <div
