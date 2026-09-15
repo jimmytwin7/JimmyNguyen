@@ -24,7 +24,7 @@ const INTERESTS: Interest[] = [
     label: "Anime",
     emoji: "🌸",
     gradient: "from-fuchsia-600 via-pink-500 to-rose-500",
-    span: "sm:col-span-2 sm:row-span-2",
+    span: "sm:col-span-2",
     back: [
       {
         heading: "Currently watching",
@@ -37,28 +37,46 @@ const INTERESTS: Interest[] = [
     ],
   },
   {
-    label: "Hobbies",
-    emoji: "🎧",
-    gradient: "from-violet-600 via-purple-500 to-indigo-500",
-    span: "sm:col-span-1 sm:row-span-1",
+    label: "Sports",
+    emoji: "🏀",
+    gradient: "from-blue-700 via-indigo-600 to-purple-600",
+    span: "sm:col-span-1",
     back: [
       {
-        heading: "Currently",
-        items: ["Duolingo", "Running", "Lifting", "Guitar"],
+        heading: "Minnesota teams",
+        items: ["Timberwolves", "Vikings", "Twins", "Wild"],
       },
     ],
+  },
+  {
+    label: "Running",
+    emoji: "",
+    gradient: "from-sky-500 via-cyan-500 to-teal-500",
+    span: "sm:col-span-1 sm:row-span-1",
+  },
+  {
+    label: "Lifting",
+    emoji: "🏋️",
+    gradient: "from-slate-600 via-gray-600 to-zinc-700",
+    span: "sm:col-span-1 sm:row-span-1",
+  },
+  {
+    label: "Acoustic Guitar",
+    emoji: "🎸",
+    gradient: "from-orange-500 via-amber-500 to-yellow-500",
+    span: "sm:col-span-1 sm:row-span-1",
+  },
+  {
+    label: "Duolingo",
+    emoji: "🦉",
+    gradient: "from-green-500 via-emerald-500 to-lime-500",
+    span: "sm:col-span-1 sm:row-span-1",
   },
   {
     label: "Cooking",
     emoji: "🍳",
     gradient: "from-amber-500 via-orange-500 to-red-500",
     span: "sm:col-span-1 sm:row-span-1",
-  },
-  {
-    label: "Sports Teams",
-    emoji: "🏀",
-    gradient: "from-emerald-600 via-teal-500 to-cyan-500",
-    span: "sm:col-span-2 sm:row-span-1",
   },
 ];
 
@@ -123,7 +141,7 @@ function BentoTile({ interest }: { interest: Interest }) {
         rotateY: flipped ? 0 : rotateY,
         transformPerspective: 1000,
       }}
-      className={`group relative ${interest.span} min-h-32 ${flippable ? "cursor-pointer" : "cursor-default"}`}
+      className={`group relative ${interest.span} ${flippable ? "row-span-2" : ""} min-h-32 ${flippable ? "cursor-pointer" : "cursor-default"}`}
     >
       {/* Inner flipper: rotates 180° on the Y axis. */}
       <motion.div
@@ -186,9 +204,9 @@ function BentoTile({ interest }: { interest: Interest }) {
                 </span>
                 <span className="text-xs text-gray-400">tap to flip back</span>
               </div>
-              <div className="min-h-0 flex-1 space-y-3 overflow-auto pr-1">
+              <div className="min-h-0 flex-1 overflow-auto pr-1 flex flex-col gap-3 md:flex-row md:gap-6">
                 {interest.back!.map((group) => (
-                  <div key={group.heading}>
+                  <div key={group.heading} className="md:flex-1">
                     <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
                       {group.heading}
                     </p>
@@ -219,7 +237,7 @@ export default function InterestsBento() {
       >
         A few of my interests
       </h2>
-      <div className="grid grid-cols-2 gap-4 sm:auto-rows-[minmax(8rem,1fr)]">
+      <div className="grid grid-cols-2 gap-4 auto-rows-[8rem] sm:grid-cols-4 sm:auto-rows-[minmax(8rem,1fr)]">
         {INTERESTS.map((interest) => (
           <BentoTile key={interest.label} interest={interest} />
         ))}

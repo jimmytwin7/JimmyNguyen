@@ -31,17 +31,17 @@ interface City {
 const DEFAULT_CENTER: [number, number] = [0, 20];
 const DEFAULT_ZOOM = 1;
 
-// Vibrant palette
-const OCEAN = "#dbeafe"; // sky-blue water
-const LAND = "#bbf7d0"; // green land
-const LAND_HOVER = "#86efac";
-const LAND_STROKE = "#4ade80";
-const VISITED = "#f59e0b"; // amber for places I've been
-const VISITED_HOVER = "#fbbf24";
-const VISITED_STROKE = "#d97706";
-const STATE_LINE = "#d97706"; // internal US state borders (on the amber US fill)
-const GRATICULE = "#93c5fd";
-const CITY_DOT = "#475569"; // slate-600, faint context dots for major cities
+// Classic atlas: blue ocean + warm tan land (contrast) with terracotta accents
+const OCEAN = "#a9d3e8"; // soft map blue water
+const LAND = "#e2cfa4"; // tan land
+const LAND_HOVER = "#d8c092";
+const LAND_STROKE = "#b89b6a"; // warm brown borders
+const VISITED = "#6b9e5e"; // sage green for places I've been (contrasts the red pins)
+const VISITED_HOVER = "#7fb271";
+const VISITED_STROKE = "#4f7a45";
+const STATE_LINE = "#4f7a45"; // internal US state borders (on the green US fill)
+const GRATICULE = "#8bbdd6"; // faint blue grid lines over the ocean
+const CITY_DOT = "#6b5842"; // muted brown context dots for major cities
 
 interface WorldMapProps {
   locations: TravelLocation[];
@@ -261,22 +261,40 @@ export default function WorldMap({
                   }}
                 >
                   <g transform={`scale(${scale})`}>
-                    {isSelected && (
-                      <circle r={12} fill="#ef4444" opacity={0.25} />
-                    )}
-                    <circle
-                      r={5.5}
-                      fill={isSelected ? "#dc2626" : "#ef4444"}
-                      stroke="#ffffff"
-                      strokeWidth={2}
-                    />
+                    {/* Google-style teardrop pin, drawn as SVG so it renders
+                        identically on every browser (unlike the 📍 emoji).
+                        The path's tip is at (0,0), so it plants on the point.
+                        Scaled up a touch when selected. */}
+                    <g
+                      transform={`scale(${isSelected ? 1.25 : 1})`}
+                      style={{ transition: "transform 0.2s ease" }}
+                    >
+                      {/* soft shadow under the tip */}
+                      <ellipse
+                        cx={0}
+                        cy={0}
+                        rx={2.2}
+                        ry={0.8}
+                        fill="#000"
+                        opacity={0.2}
+                      />
+                      {/* teardrop body: rounded top tapering to a point at (0,0) */}
+                      <path
+                        d="M0 0 C -4.2 -6, -6 -8.6, -6 -12 A 6 6 0 1 1 6 -12 C 6 -8.6, 4.2 -6, 0 0 Z"
+                        fill={isSelected ? "#b91c1c" : "#ef4444"}
+                        stroke="#ffffff"
+                        strokeWidth={1.2}
+                      />
+                      {/* inner hole */}
+                      <circle cx={0} cy={-12} r={2.2} fill="#ffffff" />
+                    </g>
 
                     {hoveredPinId === location.id &&
                       (() => {
                         const label = location.name;
                         const w = label.length * 6.5 + 14;
                         return (
-                          <g transform="translate(0, -12)" pointerEvents="none">
+                          <g transform="translate(0, -20)" pointerEvents="none">
                             <rect
                               x={-w / 2}
                               y={-19}
