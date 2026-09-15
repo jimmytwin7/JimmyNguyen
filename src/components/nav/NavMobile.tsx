@@ -9,7 +9,6 @@ const NAV_LINKS = [
   { href: "/", label: "Home" },
   { href: "/resume", label: "Resume" },
   { href: "/travel", label: "Travel" },
-  { href: "/projects", label: "Projects" },
 ] as const;
 
 const DRAWER_ID = "mobile-nav-drawer";
