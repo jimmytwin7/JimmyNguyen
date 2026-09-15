@@ -24,12 +24,9 @@ function hashColor(name: string): string {
 
 export default function SkillsSection({ categories }: SkillsSectionProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
       {categories.map((category) => (
-        <div
-          key={category.label}
-          className="bg-white rounded-xl p-5 border border-gray-100"
-        >
+        <div key={category.label}>
           <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-3">
             {category.label}
           </h3>

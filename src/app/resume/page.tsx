@@ -6,6 +6,7 @@ import ExperienceList from "@/components/resume/ExperienceList";
 import SkillsSection from "@/components/resume/SkillsSection";
 import EducationList from "@/components/resume/EducationList";
 import DownloadButton from "@/components/ui/DownloadButton";
+import SectionCard from "@/components/ui/SectionCard";
 
 export const metadata = {
   title: "Resume — Jimmy Nguyen",
@@ -17,59 +18,33 @@ export default function ResumePage() {
   const sortedExperience = reverseChronological(experience);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Professional Summary */}
-      <section aria-labelledby="summary-heading">
-        <h1
-          id="summary-heading"
-          className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 mb-4"
-        >
-          Professional Summary
-        </h1>
+      <SectionCard id="summary-heading" title="Professional Summary" as="h1">
         <p className="text-gray-700 leading-relaxed max-w-3xl">
           Software Engineer with experience in financial services building
           React-based client web applications integrated with headless CMS and
           RESTful services
         </p>
-      </section>
+        <div className="mt-6">
+          <DownloadButton />
+        </div>
+      </SectionCard>
 
       {/* Work Experience */}
-      <section aria-labelledby="experience-heading">
-        <h2
-          id="experience-heading"
-          className="text-2xl font-bold tracking-tight text-gray-900 mb-6"
-        >
-          Experience
-        </h2>
+      <SectionCard id="experience-heading" title="Experience">
         <ExperienceList entries={sortedExperience} />
-      </section>
+      </SectionCard>
 
       {/* Skills */}
-      <section aria-labelledby="skills-heading">
-        <h2
-          id="skills-heading"
-          className="text-2xl font-bold tracking-tight text-gray-900 mb-6"
-        >
-          Skills
-        </h2>
+      <SectionCard id="skills-heading" title="Skills">
         <SkillsSection categories={skillCategories} />
-      </section>
+      </SectionCard>
 
       {/* Education */}
-      <section aria-labelledby="education-heading">
-        <h2
-          id="education-heading"
-          className="text-2xl font-bold tracking-tight text-gray-900 mb-6"
-        >
-          Education
-        </h2>
+      <SectionCard id="education-heading" title="Education">
         <EducationList entries={education} />
-      </section>
-
-      {/* Download */}
-      <div className="pt-4">
-        <DownloadButton />
-      </div>
+      </SectionCard>
     </div>
   );
 }
