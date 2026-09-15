@@ -67,9 +67,8 @@ The map uses [react-simple-maps](https://www.react-simple-maps.io/) (SVG via
 `d3-geo`) rather than a tile-based map. No API key, no usage costs, and the
 styling is plain CSS/SVG. Country shapes come from
 [world-atlas](https://github.com/topojson/world-atlas) TopoJSON, copied into
-`public/geo/countries-110m.json` so there's no runtime dependency. (If the
-coastlines look too coarse when zoomed in, swap in the `50m` variant — larger
-but sharper.)
+`public/geo/countries-110m.json` so there's no runtime dependency. Clicking a
+pin animates the map to that location at its `zoom` level.
 
 ### Adding a location
 
@@ -100,15 +99,14 @@ Photos live in Cloudinary, not in the repo. It stores the originals —
 **including HEIC straight off an iPhone** — and delivers browser-friendly
 WebP/AVIF via `f_auto,q_auto`, so no local conversion is needed.
 
-Photos are **listed automatically at build time**. For each location, the build
-asks Cloudinary for everything in the display folder `travel/<id>` (via
-`resources_by_asset_folder`) and populates the gallery with the real delivery
-URLs Cloudinary returns. You never hand-list filenames — just upload to the
-right folder.
+Photos live in Cloudinary and are referenced through a **cached manifest**
+(`src/lib/travel/photos.manifest.json`) that's committed to the repo. The app
+reads that file at build time — it does **not** call Cloudinary on every build.
+You regenerate the manifest with a script whenever photos change. This keeps
+builds instant and avoids hitting Cloudinary's Admin API rate limit.
 
-This uses Cloudinary's **dynamic folders**, where an asset's folder is separate
-from its public ID. Photos are found by folder membership, not by a naming
-convention, so filenames can be anything.
+Cloudinary uses **dynamic folders** here: photos are found by their display
+folder (`travel/<id>`), so filenames can be anything.
 
 **One-time setup**
 
@@ -118,32 +116,41 @@ convention, so filenames can be anything.
 
    ```bash
    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your-cloud-name
-   CLOUDINARY_API_KEY=your-api-key       # secret — no NEXT_PUBLIC_ prefix
+   CLOUDINARY_API_KEY=your-api-key        # secret — used only by the refresh script
    CLOUDINARY_API_SECRET=your-api-secret  # secret — no NEXT_PUBLIC_ prefix
    ```
 
-   `.env.local` is gitignored. The key/secret are used **only at build time**
-   by `src/lib/travel/cloudinaryPhotos.ts` (marked `server-only`, so it can
-   never be bundled to the browser). The cloud name is public.
+   `.env.local` is gitignored. The key/secret are read only by
+   `scripts/refresh-photos.mjs` (never bundled into the app). The cloud name is
+   public and appears in delivery URLs.
 
 3. `res.cloudinary.com` is already whitelisted in `next.config.ts`.
 
-**Adding photos to a location**
+**Adding / changing photos**
 
-In the Cloudinary Media Library, create/open the folder `travel/<locationId>`
-(the folder name must match the location's `id`) and upload photos into it.
-Rebuild and they appear.
+1. In the Cloudinary Media Library, upload into the folder `travel/<locationId>`
+   (the folder name must match the location's `id`).
+2. Regenerate the manifest:
 
-- **Order:** photos are sorted by name, so prefix them (`01-`, `02-`, …) if you
-  want a specific sequence.
-- **HEIC is fine** — Cloudinary converts it to WebP/AVIF on delivery.
-- Delivery uses `f_auto,q_auto`, and the gallery renders `<Image unoptimized>`
-  since Cloudinary already optimizes (avoids double-processing).
-- Missing Cloudinary env vars (e.g. a contributor without credentials) won't
-  break the build; galleries just render their "photos coming soon" state.
+   ```bash
+   npm run refresh:photos
+   ```
 
-Photos are fetched during the static build, so **new uploads appear after the
-next deploy/rebuild**, not instantly.
+   This lists every location's folder once and writes
+   `src/lib/travel/photos.manifest.json`. Commit that file.
+
+3. Rebuild / redeploy — the gallery now shows the new photos.
+
+Notes:
+
+- **Order:** photos are sorted by name, so prefix them (`01-`, `02-`, …) for a
+  specific sequence.
+- **Captions:** fill a photo's **Description** in Cloudinary; it's read into the
+  manifest and shown in the lightbox.
+- **HEIC is fine** — Cloudinary converts it to WebP/AVIF on delivery, and the
+  gallery renders `<Image unoptimized>` since Cloudinary already optimizes.
+- A location with no photos in the manifest renders a "photos coming soon"
+  state, so it's safe to add a pin before uploading pictures.
 
 ### Accessibility notes
 
@@ -154,7 +161,7 @@ SVG.
 
 ### Known rough edges
 
-- The 110m basemap gets blocky at high zoom; the `50m` world-atlas variant is
-  sharper but larger.
-- Visited-country highlighting uses a hardcoded set of ISO codes in
+- The SVG basemap shows country outlines only — no roads, rivers, or state
+  lines. It's a stylized pin map, not a detailed atlas.
+- Visited countries are highlighted from a hardcoded set of ISO codes in
   `locations.ts` (`visitedCountryIds`); add new countries there manually.

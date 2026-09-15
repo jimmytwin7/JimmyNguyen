@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import CurrentlySection from "@/components/home/CurrentlySection";
+import Typewriter from "@/components/home/Typewriter";
+import InterestsBento from "@/components/home/InterestsBento";
 
 export default function HomePage() {
   return (
@@ -13,9 +15,9 @@ export default function HomePage() {
         <div className="flex-1 min-w-0">
           <h1
             id="hero-heading"
-            className="text-4xl sm:text-5xl font-bold tracking-tight mb-6"
+            className="text-4xl sm:text-5xl font-bold tracking-tight mb-6 min-h-[1.2em]"
           >
-            Hi, I&apos;m Jimmy Nguyen
+            <Typewriter text="Hi, I'm Jimmy Nguyen" />
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mb-8 leading-relaxed">
             Software engineer who loves building clean, fast web experiences and
@@ -61,8 +63,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="pb-16 sm:pb-24">
+      <div className="pb-10">
         <CurrentlySection />
+      </div>
+
+      <div className="pb-16 sm:pb-24">
+        <InterestsBento />
       </div>
     </>
   );

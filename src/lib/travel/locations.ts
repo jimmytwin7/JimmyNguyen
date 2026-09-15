@@ -22,15 +22,16 @@ export const visitedCountryIds: ReadonlySet<string> = new Set([
  *
  * `id` must match the Cloudinary folder name. `coordinates` are
  * [longitude, latitude] — the order d3-geo expects, reverse of Google Maps.
+ * `zoom` is the react-simple-maps scale: 6 for cities/regions, 7 for parks.
  */
 export const travelLocations: TravelLocationMeta[] = [
   {
     id: "banff-alberta",
-    name: "Banff",
+    name: "Banff National Park",
     region: "Alberta",
     country: "Canada",
     coordinates: [-115.5708, 51.1784],
-    zoom: 6,
+    zoom: 7,
     blurb:
       "Turquoise glacial lakes and the Canadian Rockies rising straight out of the treeline.",
   },
@@ -41,8 +42,7 @@ export const travelLocations: TravelLocationMeta[] = [
     country: "Vietnam",
     coordinates: [106.6297, 10.8231],
     zoom: 6,
-    blurb:
-      "Motorbike rivers, sidewalk coffee, and some of the best street food anywhere.",
+    blurb: "Organized chaos, great food, so much to do",
   },
   {
     id: "hanoi-vietnam",
@@ -52,7 +52,7 @@ export const travelLocations: TravelLocationMeta[] = [
     coordinates: [105.8342, 21.0278],
     zoom: 6,
     blurb:
-      "Old Quarter alleys, lakeside mornings, and egg coffee worth the trip on its own.",
+      "Narrow Old Quarter alleys, egg coffee, salted cream coffee, and Bun Cha",
   },
   {
     id: "ha-giang-vietnam",
@@ -62,7 +62,7 @@ export const travelLocations: TravelLocationMeta[] = [
     coordinates: [104.9784, 22.8233],
     zoom: 6,
     blurb:
-      "The northern loop — limestone karsts, switchback passes, and terraced valleys.",
+      "The best experience in all of southeast asia, a 4 day 3 night motorbike tour",
   },
   {
     id: "seattle-washington",
@@ -71,7 +71,7 @@ export const travelLocations: TravelLocationMeta[] = [
     country: "United States",
     coordinates: [-122.3321, 47.6062],
     zoom: 6,
-    blurb: "Puget Sound, evergreens, and Rainier looming on the clear days.",
+    blurb: "When I got the one rainy weekend after 8 weeks of sunshine",
   },
   {
     id: "zion-national-park",
@@ -85,7 +85,7 @@ export const travelLocations: TravelLocationMeta[] = [
   },
   {
     id: "grand-canyon",
-    name: "Grand Canyon",
+    name: "Grand Canyon National Park",
     region: "Arizona",
     country: "United States",
     coordinates: [-112.1129, 36.1069],
@@ -95,7 +95,7 @@ export const travelLocations: TravelLocationMeta[] = [
   },
   {
     id: "bryce-canyon",
-    name: "Bryce Canyon",
+    name: "Bryce Canyon National Park",
     region: "Utah",
     country: "United States",
     coordinates: [-112.1871, 37.593],
@@ -104,12 +104,12 @@ export const travelLocations: TravelLocationMeta[] = [
   },
   {
     id: "sleeping-bear-dunes",
-    name: "Sleeping Bear Dunes",
+    name: "Sleeping Bear Dunes National Lakeshore",
     region: "Michigan",
     country: "United States",
     coordinates: [-86.0586, 44.8619],
     zoom: 7,
     blurb:
-      "Sand bluffs dropping straight into Lake Michigan, bluer than it has any right to be.",
+      "Sand bluffs dropping straight into Lake Michigan, many enjoy the challenge",
   },
 ];

@@ -6,8 +6,8 @@ export const metadata = {
   description: "An interactive map of the places Jimmy Nguyen has traveled.",
 };
 
-export default async function TravelPage() {
-  const locations = await loadTravelLocations();
+export default function TravelPage() {
+  const locations = loadTravelLocations();
 
   return (
     <div className="space-y-8">

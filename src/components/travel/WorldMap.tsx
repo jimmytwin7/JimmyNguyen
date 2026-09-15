@@ -15,6 +15,17 @@ import type { TravelLocation } from "@/lib/travel/types";
 import { visitedCountryIds } from "@/lib/travel/locations";
 
 const GEO_URL = "/geo/countries-110m.json";
+const US_STATES_URL = "/geo/states-10m.json";
+const CITIES_URL = "/geo/cities-1m.json";
+
+/** Show city name labels once zoomed in past this level (keeps the world view clean). */
+const CITY_LABEL_ZOOM = 4;
+
+interface City {
+  name: string;
+  pop: number;
+  coordinates: [number, number];
+}
 
 /** Zoomed-out default view */
 const DEFAULT_CENTER: [number, number] = [0, 20];
@@ -28,7 +39,9 @@ const LAND_STROKE = "#4ade80";
 const VISITED = "#f59e0b"; // amber for places I've been
 const VISITED_HOVER = "#fbbf24";
 const VISITED_STROKE = "#d97706";
+const STATE_LINE = "#d97706"; // internal US state borders (on the amber US fill)
 const GRATICULE = "#93c5fd";
+const CITY_DOT = "#475569"; // slate-600, faint context dots for major cities
 
 interface WorldMapProps {
   locations: TravelLocation[];
@@ -46,19 +59,32 @@ export default function WorldMap({
   selected,
   onSelect,
 }: WorldMapProps) {
-  // Animated view state that eases toward the target on selection change.
   const [view, setView] = useState<View>({
     coordinates: DEFAULT_CENTER,
     zoom: DEFAULT_ZOOM,
   });
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
-  // Gate the pin drop-in until after mount so SSR and first client render
-  // agree (avoids a hydration mismatch from framer-motion's initial styles).
+  const [cities, setCities] = useState<City[]>([]);
+  // Gate the pin drop-in until after mount so SSR and first client render agree.
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Load the major-cities overlay (cities with population >= 1M).
+  useEffect(() => {
+    let cancelled = false;
+    fetch(CITIES_URL)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: City[]) => {
+        if (!cancelled) setCities(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const targetLng = selected ? selected.coordinates[0] : DEFAULT_CENTER[0];
@@ -66,18 +92,13 @@ export default function WorldMap({
   const targetZoom = selected ? selected.zoom : DEFAULT_ZOOM;
 
   useEffect(() => {
-    // Read the current view once; don't list it as a dep or every animation
-    // frame would restart the effect. The deps are the fixed-size primitive
-    // target values below.
     const fromLng = view.coordinates[0];
     const fromLat = view.coordinates[1];
     const fromZoom = view.zoom;
 
-    // Drive a 0→1 progress value and interpolate center + zoom together so the
-    // pan and zoom stay in sync for a smooth glide.
     const controls = animate(0, 1, {
       duration: 0.8,
-      ease: [0.22, 1, 0.36, 1], // easeOutQuint-ish
+      ease: [0.22, 1, 0.36, 1],
       onUpdate: (t) => {
         setView({
           coordinates: [
@@ -89,13 +110,11 @@ export default function WorldMap({
       },
     });
     return () => controls.stop();
-    // Only re-run when the target changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetLng, targetLat, targetZoom]);
 
-  // The SVG projection math can differ subtly between server and client, which
-  // trips React's hydration check. Render a matching placeholder on the server
-  // and first client render, then swap in the real map after mount.
+  // The map's SVG projection can differ subtly between server and client, which
+  // trips hydration. Render a matching placeholder until mounted.
   if (!mounted) {
     return (
       <div
@@ -121,7 +140,6 @@ export default function WorldMap({
           minZoom={1}
           maxZoom={12}
         >
-          {/* Ocean sphere + lat/long grid for an atlas feel */}
           <Sphere
             id="ocean-sphere"
             fill={OCEAN}
@@ -136,7 +154,6 @@ export default function WorldMap({
                 const id = String(geo.id);
                 const visited = visitedCountryIds.has(id);
                 const isHovered = hoveredId === id;
-
                 const fill = visited
                   ? isHovered
                     ? VISITED_HOVER
@@ -144,7 +161,6 @@ export default function WorldMap({
                   : isHovered
                     ? LAND_HOVER
                     : LAND;
-
                 return (
                   <Geography
                     key={geo.rsmKey}
@@ -154,21 +170,64 @@ export default function WorldMap({
                     fill={fill}
                     stroke={visited ? VISITED_STROKE : LAND_STROKE}
                     strokeWidth={visited ? 0.7 : 0.4}
-                    style={{
-                      outline: "none",
-                      transition: "fill 0.2s ease",
-                    }}
+                    style={{ outline: "none", transition: "fill 0.2s ease" }}
                   />
                 );
               })
             }
           </Geographies>
 
+          {/* US state borders — transparent fill, thin stroke, drawn on top of
+              the country fills. Only visible when zoomed into the US. */}
+          <Geographies geography={US_STATES_URL}>
+            {({ geographies }) =>
+              geographies.map((geo) => (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  fill="transparent"
+                  stroke={STATE_LINE}
+                  strokeWidth={0.3}
+                  style={{
+                    outline: "none",
+                    pointerEvents: "none",
+                  }}
+                />
+              ))
+            }
+          </Geographies>
+
+          {/* Major cities (pop >= 1M): hidden at the world view, revealed (dot +
+              label) once zoomed in, so they act as context rather than clutter.
+              pointer-events off so they never intercept travel-pin clicks. */}
+          {view.zoom >= CITY_LABEL_ZOOM &&
+            cities.map((city) => {
+              const s = 1 / view.zoom;
+              return (
+                <Marker
+                  key={`city-${city.name}-${city.coordinates[0]}`}
+                  coordinates={city.coordinates}
+                  style={{ pointerEvents: "none" }}
+                >
+                  <g transform={`scale(${s})`} pointerEvents="none">
+                    <circle r={1.6} fill={CITY_DOT} opacity={0.55} />
+                    <text
+                      x={3}
+                      y={2.5}
+                      fontSize={7}
+                      fill={CITY_DOT}
+                      opacity={0.8}
+                    >
+                      {city.name}
+                    </text>
+                  </g>
+                </Marker>
+              );
+            })}
+
           {locations.map((location, index) => {
             const isSelected = selected?.id === location.id;
-            // Counter-scale the marker so pins stay the same visual size as we zoom
             const scale = 1 / view.zoom;
-
             return (
               <Marker
                 key={location.id}
@@ -191,9 +250,6 @@ export default function WorldMap({
                 className="cursor-pointer focus:outline-none"
                 style={{ cursor: "pointer" }}
               >
-                {/* Drop-in: fall from above and fade in, staggered per pin.
-                    The map only renders after mount, so this is client-only —
-                    safe to animate from the offset start with no SSR mismatch. */}
                 <motion.g
                   initial={{ opacity: 0, y: -18 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -205,7 +261,6 @@ export default function WorldMap({
                   }}
                 >
                   <g transform={`scale(${scale})`}>
-                    {/* Halo on the selected pin */}
                     {isSelected && (
                       <circle r={12} fill="#ef4444" opacity={0.25} />
                     )}
@@ -216,8 +271,6 @@ export default function WorldMap({
                       strokeWidth={2}
                     />
 
-                    {/* Name tooltip on hover/focus. Rendered last so it sits on
-                        top; width is estimated from the label length. */}
                     {hoveredPinId === location.id &&
                       (() => {
                         const label = location.name;

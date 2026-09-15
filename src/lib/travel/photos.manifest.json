@@ -1,0 +1,295 @@
+{
+  "generatedAt": "2026-09-15T23:05:03.094Z",
+  "photosByLocation": {
+    "banff-alberta": [
+      {
+        "id": "IMG_1066",
+        "label": "IMG_1066",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_1066",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_1066",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_1066",
+        "caption": "Campsite"
+      }
+    ],
+    "saigon-vietnam": [
+      {
+        "id": "IMG_0192",
+        "label": "IMG_0192",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_0192",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_0192",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_0192",
+        "caption": "Saigon's apartment cafes"
+      }
+    ],
+    "hanoi-vietnam": [],
+    "ha-giang-vietnam": [
+      {
+        "id": "IMG_9063",
+        "label": "IMG_9063",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9063",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9063",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9063"
+      },
+      {
+        "id": "IMG_9178",
+        "label": "IMG_9178",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9178",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9178",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9178"
+      },
+      {
+        "id": "IMG_9217",
+        "label": "IMG_9217",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9217",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9217",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9217"
+      },
+      {
+        "id": "IMG_9295",
+        "label": "IMG_9295",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9295",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9295",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9295"
+      },
+      {
+        "id": "IMG_9308",
+        "label": "IMG_9308",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9308",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9308",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9308"
+      },
+      {
+        "id": "IMG_9333",
+        "label": "IMG_9333",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9333",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9333",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9333"
+      },
+      {
+        "id": "IMG_9341",
+        "label": "IMG_9341",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9341",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9341",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9341"
+      },
+      {
+        "id": "IMG_9342",
+        "label": "IMG_9342",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9342",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9342",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9342"
+      },
+      {
+        "id": "IMG_9461",
+        "label": "IMG_9461",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9461",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9461",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9461"
+      },
+      {
+        "id": "IMG_9470",
+        "label": "IMG_9470",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9470",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9470",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9470"
+      },
+      {
+        "id": "IMG_9614",
+        "label": "IMG_9614",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9614",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9614",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9614"
+      },
+      {
+        "id": "IMG_9628",
+        "label": "IMG_9628",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9628",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9628",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9628"
+      }
+    ],
+    "seattle-washington": [
+      {
+        "id": "IMG_2734",
+        "label": "IMG_2734",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_2734",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_2734",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_2734",
+        "caption": "Posing outside the famous pike place market"
+      },
+      {
+        "id": "IMG_2745",
+        "label": "IMG_2745",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_2745",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_2745",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_2745",
+        "caption": "Fresh never frozen"
+      },
+      {
+        "id": "IMG_3406",
+        "label": "IMG_3406",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3406",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3406",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3406",
+        "caption": "Claiming top spot on the gum wall"
+      },
+      {
+        "id": "IMG_9168",
+        "label": "IMG_9168",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_9168",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_9168",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_9168",
+        "caption": "Gasworks park"
+      }
+    ],
+    "zion-national-park": [
+      {
+        "id": "IMG_3455",
+        "label": "IMG_3455",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3455",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3455",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3455"
+      },
+      {
+        "id": "IMG_3491",
+        "label": "IMG_3491",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3491",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3491",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3491",
+        "caption": "Angel's landing"
+      },
+      {
+        "id": "IMG_3495",
+        "label": "IMG_3495",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3495",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3495",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3495"
+      },
+      {
+        "id": "IMG_3515",
+        "label": "IMG_3515",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3515",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3515",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3515"
+      },
+      {
+        "id": "IMG_3548",
+        "label": "IMG_3548",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3548",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3548",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3548",
+        "caption": "Best campsite ever"
+      }
+    ],
+    "grand-canyon": [
+      {
+        "id": "IMG_3251",
+        "label": "IMG_3251",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3251",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3251",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3251"
+      },
+      {
+        "id": "IMG_3259",
+        "label": "IMG_3259",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3259",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3259",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3259"
+      },
+      {
+        "id": "IMG_3260",
+        "label": "IMG_3260",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3260",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3260",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3260"
+      },
+      {
+        "id": "IMG_3268",
+        "label": "IMG_3268",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3268",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3268",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3268"
+      },
+      {
+        "id": "IMG_3296",
+        "label": "IMG_3296",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3296",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3296",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3296"
+      },
+      {
+        "id": "IMG_3300",
+        "label": "IMG_3300",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3300",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3300",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3300"
+      },
+      {
+        "id": "IMG_3309",
+        "label": "IMG_3309",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3309",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3309",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3309"
+      }
+    ],
+    "bryce-canyon": [
+      {
+        "id": "IMG_3644",
+        "label": "IMG_3644",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3644",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3644",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3644"
+      },
+      {
+        "id": "IMG_3654",
+        "label": "IMG_3654",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3654",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3654",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3654"
+      },
+      {
+        "id": "IMG_3757",
+        "label": "IMG_3757",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3757",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3757",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3757"
+      },
+      {
+        "id": "IMG_3771",
+        "label": "IMG_3771",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3771",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3771",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3771"
+      },
+      {
+        "id": "IMG_3841",
+        "label": "IMG_3841",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3841",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3841",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3841"
+      },
+      {
+        "id": "IMG_3842",
+        "label": "IMG_3842",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3842",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3842",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3842"
+      },
+      {
+        "id": "IMG_3853",
+        "label": "IMG_3853",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3853",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3853",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3853"
+      },
+      {
+        "id": "IMG_3862",
+        "label": "IMG_3862",
+        "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_3862",
+        "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_3862",
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_3862"
+      }
+    ],
+    "sleeping-bear-dunes": []
+  }
+}
