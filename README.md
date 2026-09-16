@@ -3,8 +3,8 @@
 Personal portfolio site — a resume page and an interactive travel map, built as
 a fully static Next.js app with no database, CMS, or API routes.
 
-**Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4
-(light/dark theming) · react-simple-maps · Framer Motion
+**Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 ·
+next-themes (light/dark) · react-simple-maps · Framer Motion
 
 ## Getting started
 
@@ -52,10 +52,11 @@ The site has a manual light/dark toggle (in the header, sun/moon icon), built on
 a **semantic CSS-variable token layer** in `globals.css` rather than scattered
 `dark:` utilities across every component.
 
-Every visit starts in light mode — the preference is deliberately **not**
-persisted. That keeps the server HTML and the first client render identical, with
-nothing mutating `<html>` before hydration, which is what makes the toggle
-reliable on initial page load.
+The choice persists across visits, handled by
+[next-themes](https://github.com/pacocoursey/next-themes) — it owns the
+pre-paint script that restores the saved theme onto `<html>`, so there's no
+flash of the wrong one. `enableSystem` is off, so it's an explicit light/dark
+choice with light as the default rather than following the OS setting.
 
 How it works:
 
@@ -68,6 +69,18 @@ How it works:
   one class on `<html>` re-themes the whole site with no per-element variants.
 - The brand blue stays constant, but `--accent` brightens from `brand-700`
   (light) to `brand-500` (dark) so it reads against the slate dark canvas.
+
+Two implementation notes worth keeping:
+
+- `next-themes` does the persistence rather than a hand-rolled inline script.
+  Restoring a theme before hydration is genuinely fiddly — a hand-written script
+  that mutates `<html>` too early breaks hydration, which silently kills
+  interactivity on the page until a client-side navigation. The library handles
+  that correctly.
+- In `ThemeToggle`, both the sun and moon icons are always rendered and the
+  `dark:` variant decides which is visible, so the button's markup is identical
+  on the server and the client. Deriving the icon from React state reintroduces
+  a server/client divergence.
 
 Two border tokens exist on purpose:
 
@@ -98,7 +111,8 @@ src/
     nav/                # Nav + desktop/mobile variants, active-route NavLink
     resume/             # experience, skills, education sections
     travel/             # TravelMapClient, WorldMap, LocationPanel, Lightbox
-    ui/                 # SectionCard, CursorDot, DownloadButton, FocusTrapper, ThemeToggle
+    ui/                 # SectionCard, CursorDot, DownloadButton, FocusTrapper,
+                        #   ThemeToggle, ThemeProvider
     Footer.tsx
   lib/
     data/               # resume content (experience, skills, education)
@@ -108,6 +122,7 @@ public/
   geo/                  # TopoJSON basemap layers (countries, US states, cities)
   Jimmy_Nguyen_Resume.pdf
   headshot.jpg
+  umn.png               # university logo used by the education section
 scripts/
   refresh-photos.mjs    # regenerates the photo manifest from Cloudinary
 ```
