@@ -10,22 +10,35 @@ export default function EducationList({ entries }: EducationListProps) {
     <ul className="space-y-6">
       {entries.map((entry) => (
         <li key={`${entry.institution}-${entry.graduationYear}`}>
-          {/* items-stretch so the logo can match the row's full height */}
-          <div className="flex items-stretch gap-4">
-            {entry.logo && (
-              <Image
-                src={entry.logo}
-                alt={`${entry.institution} logo`}
-                width={96}
-                height={96}
-                className="shrink-0 w-24 h-auto rounded-sm object-contain"
-              />
-            )}
+          {/*
+            Mobile: top row = logo (left) + university name (right); details fill
+            the row below, full width.
+            sm+: logo on the left, all text beside it, "Class of" pushed right.
+          */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
+            {/* Top row on mobile / left column on desktop */}
+            <div className="flex items-center gap-4 sm:contents">
+              {entry.logo && (
+                <Image
+                  src={entry.logo}
+                  alt={`${entry.institution} logo`}
+                  width={96}
+                  height={96}
+                  className="shrink-0 w-16 sm:w-24 h-auto rounded-sm object-contain"
+                />
+              )}
+              {/* University name — sits top-right on mobile, hidden here on
+                  desktop (shown in the detail block instead). */}
+              <h3 className="text-lg font-semibold text-gray-900 sm:hidden">
+                {entry.institution}
+              </h3>
+            </div>
 
-            {/* Text block grows; Class of pushes to the far right */}
+            {/* Detail block: full-width bottom on mobile, beside the logo on sm+ */}
             <div className="flex flex-1 items-start justify-between gap-4">
               <div className="flex flex-col gap-1">
-                <h3 className="text-lg font-semibold text-gray-900">
+                {/* Institution name for desktop only (mobile shows it up top) */}
+                <h3 className="hidden text-lg font-semibold text-gray-900 sm:block">
                   {entry.institution}
                 </h3>
                 <p className="text-base text-gray-700">
