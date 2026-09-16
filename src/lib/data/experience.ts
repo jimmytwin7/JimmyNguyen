@@ -43,16 +43,16 @@ export const experience: Company[] = [
       },
       {
         title: "Cloud/Data Engineer LDP",
-        startDate: "2023-12",
-        endDate: "present",
+        startDate: "2023-07",
+        endDate: "2023-12",
         bullets: [
           "Deployed a function within AWS Lambda that automated the teams daily ingestion of 7,000,000 records into the database in a near real-time fashion, utilizing both Amazon S3 and Amazon Athena in conjunction",
         ],
       },
       {
         title: "Software Architect/Developer LDP",
-        startDate: "2023-12",
-        endDate: "present",
+        startDate: "2023-01",
+        endDate: "2023-06",
         bullets: [
           "Partnered with architecture to design and develop an integration between data lake and application API to load engagement data as research notes, lead development of the interface from requirements through functional testing and successfully handing off to BAU team.",
           "Implemented and tested notification features for Columbia Threadneedles file storage and transfers platform, employing Amazon SNS, Amazon SQS, and AWS Lambda to enable an auditable and reliable service under the .NET framework",
@@ -61,8 +61,8 @@ export const experience: Company[] = [
       },
       {
         title: "Platform Engineer LDP",
-        startDate: "2023-12",
-        endDate: "present",
+        startDate: "2022-06",
+        endDate: "2022-12",
         bullets: [
           "Performed migration of twenty applications from being hosted OnPrem to Amazon EKS",
           "Directed two of sixteen product team releases from OnPrem to AWS, making use of Sumo Logic for monitoring and Postman for validations",
