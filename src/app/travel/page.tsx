@@ -12,10 +12,10 @@ export default function TravelPage() {
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 mb-2">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-app mb-2">
           Travel
         </h1>
-        <p className="text-gray-600 text-lg">
+        <p className="text-muted text-lg">
           {locations.length} places so far. Click a pin to zoom in.
         </p>
       </header>

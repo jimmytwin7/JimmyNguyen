@@ -20,14 +20,14 @@ export default function SectionCard({
   return (
     <section
       aria-labelledby={id}
-      className="rounded-2xl border border-gray-100 bg-white p-6 sm:p-8 shadow-sm"
+      className="rounded-2xl border border-edge bg-surface p-6 sm:p-8 shadow-sm"
     >
       <Heading
         id={id}
         className={
           as === "h1"
-            ? "text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 mb-4"
-            : "text-xl font-bold tracking-tight text-gray-900 mb-6"
+            ? "text-2xl sm:text-3xl font-bold tracking-tight text-app mb-4"
+            : "text-xl font-bold tracking-tight text-app mb-6"
         }
       >
         {title}

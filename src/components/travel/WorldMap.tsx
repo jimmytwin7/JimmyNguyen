@@ -31,17 +31,69 @@ interface City {
 const DEFAULT_CENTER: [number, number] = [0, 20];
 const DEFAULT_ZOOM = 1;
 
-// Classic atlas: blue ocean + warm tan land (contrast) with terracotta accents
-const OCEAN = "#a9d3e8"; // soft map blue water
-const LAND = "#e2cfa4"; // tan land
-const LAND_HOVER = "#d8c092";
-const LAND_STROKE = "#b89b6a"; // warm brown borders
-const VISITED = "#6b9e5e"; // sage green for places I've been (contrasts the red pins)
-const VISITED_HOVER = "#7fb271";
-const VISITED_STROKE = "#4f7a45";
-const STATE_LINE = "#4f7a45"; // internal US state borders (on the green US fill)
-const GRATICULE = "#8bbdd6"; // faint blue grid lines over the ocean
-const CITY_DOT = "#6b5842"; // muted brown context dots for major cities
+/**
+ * Tracks whether the dark theme is active by watching the `.dark` class on
+ * <html>, so the SVG map (whose fills are JS values, not CSS) recolors live
+ * when the user flips the theme toggle. Starts false so SSR and the first
+ * client render match; the observer syncs it right after mount.
+ */
+function useIsDark(): boolean {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const sync = () => setIsDark(root.classList.contains("dark"));
+    sync();
+    const observer = new MutationObserver(sync);
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
+
+interface MapPalette {
+  ocean: string;
+  land: string;
+  landHover: string;
+  landStroke: string;
+  visited: string;
+  visitedHover: string;
+  visitedStroke: string;
+  stateLine: string;
+  graticule: string;
+  cityDot: string;
+}
+
+// Light: classic atlas — blue ocean + warm tan land, sage-green visited fills.
+const LIGHT_PALETTE: MapPalette = {
+  ocean: "#a9d3e8",
+  land: "#e2cfa4",
+  landHover: "#d8c092",
+  landStroke: "#b89b6a",
+  visited: "#6b9e5e",
+  visitedHover: "#7fb271",
+  visitedStroke: "#4f7a45",
+  stateLine: "#4f7a45",
+  graticule: "#8bbdd6",
+  cityDot: "#6b5842",
+};
+
+// Dark: deep-slate night map — muted land against a deep-blue ocean, with a
+// lightened sage so visited countries still read against the dark fills. The
+// red travel pins are unchanged and pop nicely on this palette.
+const DARK_PALETTE: MapPalette = {
+  ocean: "#0b1f33",
+  land: "#33415580", // slate-700 @ 50% so land sits just above the ocean
+  landHover: "#3f4f68",
+  landStroke: "#475569",
+  visited: "#3f7d4e",
+  visitedHover: "#4c9760",
+  visitedStroke: "#6ee7a8",
+  stateLine: "#6ee7a8",
+  graticule: "#1e3a52",
+  cityDot: "#94a3b8",
+};
 
 interface WorldMapProps {
   locations: TravelLocation[];
@@ -68,6 +120,7 @@ export default function WorldMap({
   const [cities, setCities] = useState<City[]>([]);
   // Gate the pin drop-in until after mount so SSR and first client render agree.
   const [mounted, setMounted] = useState(false);
+  const palette = useIsDark() ? DARK_PALETTE : LIGHT_PALETTE;
 
   useEffect(() => {
     setMounted(true);
@@ -118,21 +171,21 @@ export default function WorldMap({
   if (!mounted) {
     return (
       <div
-        className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm"
-        style={{ backgroundColor: OCEAN, aspectRatio: "900 / 450" }}
+        className="overflow-hidden rounded-2xl border border-edge shadow-sm"
+        style={{ backgroundColor: palette.ocean, aspectRatio: "900 / 450" }}
         aria-hidden="true"
       />
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-edge shadow-sm">
       <ComposableMap
         projection="geoEqualEarth"
         width={900}
         height={450}
         className="w-full h-auto"
-        style={{ backgroundColor: OCEAN }}
+        style={{ backgroundColor: palette.ocean }}
       >
         <ZoomableGroup
           center={view.coordinates}
@@ -142,11 +195,11 @@ export default function WorldMap({
         >
           <Sphere
             id="ocean-sphere"
-            fill={OCEAN}
-            stroke={GRATICULE}
+            fill={palette.ocean}
+            stroke={palette.graticule}
             strokeWidth={0.5}
           />
-          <Graticule stroke={GRATICULE} strokeWidth={0.5} />
+          <Graticule stroke={palette.graticule} strokeWidth={0.5} />
 
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
@@ -156,11 +209,11 @@ export default function WorldMap({
                 const isHovered = hoveredId === id;
                 const fill = visited
                   ? isHovered
-                    ? VISITED_HOVER
-                    : VISITED
+                    ? palette.visitedHover
+                    : palette.visited
                   : isHovered
-                    ? LAND_HOVER
-                    : LAND;
+                    ? palette.landHover
+                    : palette.land;
                 return (
                   <Geography
                     key={geo.rsmKey}
@@ -168,7 +221,9 @@ export default function WorldMap({
                     onMouseEnter={() => setHoveredId(id)}
                     onMouseLeave={() => setHoveredId(null)}
                     fill={fill}
-                    stroke={visited ? VISITED_STROKE : LAND_STROKE}
+                    stroke={
+                      visited ? palette.visitedStroke : palette.landStroke
+                    }
                     strokeWidth={visited ? 0.7 : 0.4}
                     style={{ outline: "none", transition: "fill 0.2s ease" }}
                   />
@@ -186,7 +241,7 @@ export default function WorldMap({
                   key={geo.rsmKey}
                   geography={geo}
                   fill="transparent"
-                  stroke={STATE_LINE}
+                  stroke={palette.stateLine}
                   strokeWidth={0.3}
                   style={{
                     outline: "none",
@@ -210,12 +265,12 @@ export default function WorldMap({
                   style={{ pointerEvents: "none" }}
                 >
                   <g transform={`scale(${s})`} pointerEvents="none">
-                    <circle r={1.6} fill={CITY_DOT} opacity={0.55} />
+                    <circle r={1.6} fill={palette.cityDot} opacity={0.55} />
                     <text
                       x={3}
                       y={2.5}
                       fontSize={7}
-                      fill={CITY_DOT}
+                      fill={palette.cityDot}
                       opacity={0.8}
                     >
                       {city.name}

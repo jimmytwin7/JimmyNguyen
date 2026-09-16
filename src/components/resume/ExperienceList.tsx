@@ -7,7 +7,7 @@ interface ExperienceListProps {
 
 export default function ExperienceList({ entries }: ExperienceListProps) {
   return (
-    <ul className="relative ml-2 space-y-8 border-l border-gray-200 pl-6">
+    <ul className="relative ml-2 space-y-8 border-l border-line pl-6">
       {entries.map((company, index) => (
         <li key={`${company.name}-${index}`} className="relative">
           {/* Timeline dot, centered on the rail.
@@ -16,11 +16,14 @@ export default function ExperienceList({ entries }: ExperienceListProps) {
               left = -(24px padding + 6px half-dot - 0.5px half-border). */}
           <span
             aria-hidden="true"
-            className="absolute top-1.5 h-3 w-3 rounded-full ring-4 ring-white"
-            style={{
-              left: "calc(-1.5rem - 7px + 0.5px)",
-              backgroundColor: "var(--color-brand-500)",
-            }}
+            className="absolute top-1.5 h-3 w-3 rounded-full ring-4"
+            style={
+              {
+                left: "calc(-1.5rem - 7px + 0.5px)",
+                backgroundColor: "var(--color-brand-500)",
+                "--tw-ring-color": "var(--surface)",
+              } as React.CSSProperties
+            }
           />
           <ExperienceItem company={company} />
         </li>

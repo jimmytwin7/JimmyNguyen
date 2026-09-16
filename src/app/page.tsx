@@ -19,7 +19,7 @@ export default function HomePage() {
           >
             <Typewriter text="Hi, I'm Jimmy Nguyen" />
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mb-8 leading-relaxed min-h-[3.5em]">
+          <p className="text-lg sm:text-xl text-muted max-w-2xl mb-8 leading-relaxed min-h-[3.5em]">
             <Typewriter
               text="Software engineer who loves building clean, fast web experiences and exploring the world one city at a time."
               speed={25}
@@ -30,13 +30,13 @@ export default function HomePage() {
             <Link
               href="/resume"
               className="inline-flex items-center px-5 py-2.5 rounded-lg font-medium text-white"
-              style={{ backgroundColor: "var(--color-brand-700)" }}
+              style={{ backgroundColor: "var(--accent)" }}
             >
               View Resume
             </Link>
             <Link
               href="/travel"
-              className="inline-flex items-center px-5 py-2.5 rounded-lg font-medium border border-gray-300 text-gray-700 hover:border-gray-400"
+              className="inline-flex items-center px-5 py-2.5 rounded-lg font-medium border border-line text-app hover:border-faint transition-colors"
             >
               Travel Map Project
             </Link>
@@ -44,7 +44,7 @@ export default function HomePage() {
               href="https://github.com/jimmytwin7"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-5 py-2.5 rounded-lg font-medium border border-gray-300 text-gray-700 hover:border-gray-400"
+              className="inline-flex items-center px-5 py-2.5 rounded-lg font-medium border border-line text-app hover:border-faint transition-colors"
             >
               GitHub ↗
             </a>
@@ -53,7 +53,7 @@ export default function HomePage() {
 
         {/* Right: headshot */}
         <div className="shrink-0">
-          <div className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full overflow-hidden ring-4 ring-white shadow-xl">
+          <div className="relative w-48 h-48 sm:w-64 sm:h-64 rounded-full overflow-hidden ring-4 ring-surface shadow-xl">
             <Image
               src="/headshot.jpg"
               alt="Jimmy Nguyen"

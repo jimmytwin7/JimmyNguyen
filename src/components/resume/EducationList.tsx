@@ -29,7 +29,7 @@ export default function EducationList({ entries }: EducationListProps) {
               )}
               {/* University name — sits top-right on mobile, hidden here on
                   desktop (shown in the detail block instead). */}
-              <h3 className="text-lg font-semibold text-gray-900 sm:hidden">
+              <h3 className="text-lg font-semibold text-app sm:hidden">
                 {entry.institution}
               </h3>
             </div>
@@ -38,21 +38,18 @@ export default function EducationList({ entries }: EducationListProps) {
             <div className="flex flex-1 items-start justify-between gap-4">
               <div className="flex flex-col gap-1">
                 {/* Institution name for desktop only (mobile shows it up top) */}
-                <h3 className="hidden text-lg font-semibold text-gray-900 sm:block">
+                <h3 className="hidden text-lg font-semibold text-app sm:block">
                   {entry.institution}
                 </h3>
-                <p className="text-base text-gray-700">
+                <p className="text-base text-app">
                   {entry.degree}
                   {entry.fieldOfStudy && (
-                    <span className="text-gray-500">
-                      {" "}
-                      · {entry.fieldOfStudy}
-                    </span>
+                    <span className="text-muted"> · {entry.fieldOfStudy}</span>
                   )}
                 </p>
-                <p className="text-base text-gray-500">Minor in Management</p>
+                <p className="text-base text-muted">Minor in Management</p>
               </div>
-              <p className="text-sm text-gray-500 shrink-0">
+              <p className="text-sm text-muted shrink-0">
                 Class of {entry.graduationYear}
               </p>
             </div>

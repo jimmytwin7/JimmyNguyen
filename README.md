@@ -3,8 +3,8 @@
 Personal portfolio site — a resume page and an interactive travel map, built as
 a fully static Next.js app with no database, CMS, or API routes.
 
-**Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 ·
-react-simple-maps · Framer Motion
+**Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4
+(light/dark theming) · react-simple-maps · Framer Motion
 
 ## Getting started
 
@@ -46,23 +46,59 @@ resume, edit `src/lib/data/`. To add a travel location, edit
 `src/lib/travel/locations.ts`. TypeScript is the schema — a malformed entry is a
 build error, not a runtime surprise.
 
+### Theming (light & dark)
+
+The site has a manual light/dark toggle (in the header, sun/moon icon), built on
+a **semantic CSS-variable token layer** in `globals.css` rather than scattered
+`dark:` utilities across every component.
+
+Every visit starts in light mode — the preference is deliberately **not**
+persisted. That keeps the server HTML and the first client render identical, with
+nothing mutating `<html>` before hydration, which is what makes the toggle
+reliable on initial page load.
+
+How it works:
+
+- `@custom-variant dark (&:where(.dark, .dark *))` makes dark mode key off a
+  `.dark` class on `<html>`, flipped by the toggle button.
+- Semantic tokens (`--surface`, `--surface-muted`, `--text`, `--border`,
+  `--accent`, …) are defined once with light values in `:root` and overridden
+  under `.dark`, then registered as Tailwind `@theme` colors. Components use
+  utilities like `bg-surface`, `text-muted`, or `border-edge`, so flipping the
+  one class on `<html>` re-themes the whole site with no per-element variants.
+- The brand blue stays constant, but `--accent` brightens from `brand-700`
+  (light) to `brand-500` (dark) so it reads against the slate dark canvas.
+
+Two border tokens exist on purpose:
+
+- **`border-edge`** — transparent in light mode (so cards read as shadow-only,
+  their original look) and a visible slate outline in dark mode.
+- **`border-line`** — visible in both themes, for structural dividers (header,
+  footer, résumé timeline) and outlined buttons.
+
+The travel map is a special case: its colors are JavaScript values baked into
+SVG fills, not CSS, so tokens can't reach them. `WorldMap.tsx` keeps a
+`LIGHT_PALETTE`/`DARK_PALETTE` pair and a `useIsDark()` hook that watches the
+`.dark` class with a `MutationObserver`, so the map recolors live when you
+toggle.
+
 ### Project structure
 
 ```
 src/
   app/
-    layout.tsx          # shell: header, nav, footer, cursor dot, analytics
+    layout.tsx          # shell: header, nav, footer, cursor dot, theme toggle, analytics
     page.tsx            # home
     resume/page.tsx
     travel/page.tsx
     not-found.tsx
-    globals.css         # Tailwind v4 + brand CSS custom properties
+    globals.css         # Tailwind v4 @theme + light/dark semantic tokens
   components/
     home/               # Typewriter, CurrentlySection, InterestsBento
     nav/                # Nav + desktop/mobile variants, active-route NavLink
     resume/             # experience, skills, education sections
     travel/             # TravelMapClient, WorldMap, LocationPanel, Lightbox
-    ui/                 # SectionCard, CursorDot, DownloadButton, FocusTrapper
+    ui/                 # SectionCard, CursorDot, DownloadButton, FocusTrapper, ThemeToggle
     Footer.tsx
   lib/
     data/               # resume content (experience, skills, education)
@@ -222,6 +258,8 @@ whole set, so opening a large gallery doesn't pull down every full-size image.
   delay, so the two don't animate over each other.
 - **`CursorDot`** — a custom trailing cursor, deliberately disabled on `/travel`
   where it would fight the map's own interactions.
+- **`ThemeToggle`** — the light/dark switch in the header; see
+  [Theming](#theming-light--dark) for how the token layer works.
 - **Analytics** — `@vercel/analytics` mounted once in the root layout.
 
 ## Accessibility

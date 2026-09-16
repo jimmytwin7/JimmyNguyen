@@ -21,7 +21,7 @@ export default function ResumePage() {
     <div className="space-y-6">
       {/* Professional Summary */}
       <SectionCard id="summary-heading" title="Professional Summary" as="h1">
-        <p className="text-gray-700 leading-relaxed max-w-3xl">
+        <p className="text-app leading-relaxed max-w-3xl">
           Software Engineer with experience in financial services building
           React-based client web applications integrated with headless CMS and
           RESTful services

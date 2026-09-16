@@ -5,9 +5,9 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-gray-200 bg-white/60">
+    <footer className="border-t border-line bg-surface/60">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           © {year} Jimmy Nguyen. All rights reserved.
         </p>
 
@@ -17,7 +17,7 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="GitHub"
-            className="text-gray-500 hover:text-gray-900 transition-colors"
+            className="text-muted hover:text-app transition-colors"
           >
             <svg
               aria-hidden="true"
@@ -39,7 +39,7 @@ export default function Footer() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="LinkedIn"
-            className="text-gray-500 hover:text-gray-900 transition-colors"
+            className="text-muted hover:text-app transition-colors"
           >
             <svg
               aria-hidden="true"

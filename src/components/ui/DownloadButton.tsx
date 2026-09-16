@@ -30,7 +30,7 @@ export default function DownloadButton() {
         onClick={handleClick}
         aria-disabled={checking}
         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium text-white transition-opacity"
-        style={{ backgroundColor: "var(--color-brand-700)" }}
+        style={{ backgroundColor: "var(--accent)" }}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +50,7 @@ export default function DownloadButton() {
         {checking ? "Checking…" : "Download Resume"}
       </a>
       {error && (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
           Resume PDF is currently unavailable. Please try again later.
         </p>
       )}

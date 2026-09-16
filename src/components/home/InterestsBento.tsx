@@ -191,7 +191,7 @@ function BentoTile({ interest }: { interest: Interest }) {
         {/* BACK */}
         {flippable && (
           <div
-            className="absolute inset-0 overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-gray-100"
+            className="absolute inset-0 overflow-hidden rounded-2xl bg-surface shadow-md ring-1 ring-edge"
             style={{
               backfaceVisibility: "hidden",
               transform: "rotateY(180deg)",
@@ -199,20 +199,20 @@ function BentoTile({ interest }: { interest: Interest }) {
           >
             <div className="flex h-full flex-col p-5">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-app">
                   {interest.label}
                 </span>
-                <span className="text-xs text-gray-400">tap to flip back</span>
+                <span className="text-xs text-faint">tap to flip back</span>
               </div>
               <div className="min-h-0 flex-1 overflow-auto pr-1 flex flex-col gap-3 md:flex-row md:gap-6">
                 {interest.back!.map((group) => (
                   <div key={group.heading} className="md:flex-1">
-                    <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                    <p className="text-xs font-medium uppercase tracking-wide text-faint">
                       {group.heading}
                     </p>
                     <ul className="mt-1 space-y-0.5">
                       {group.items.map((item) => (
-                        <li key={item} className="text-sm text-gray-700">
+                        <li key={item} className="text-sm text-app">
                           {item}
                         </li>
                       ))}
@@ -233,7 +233,7 @@ export default function InterestsBento() {
     <section aria-labelledby="interests-heading">
       <h2
         id="interests-heading"
-        className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-4"
+        className="text-sm font-semibold uppercase tracking-wide text-muted mb-4"
       >
         A few of my interests
       </h2>

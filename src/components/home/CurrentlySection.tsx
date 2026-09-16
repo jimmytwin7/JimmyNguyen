@@ -56,11 +56,11 @@ export default function CurrentlySection() {
   return (
     <section
       aria-labelledby="currently-heading"
-      className="rounded-2xl shadow-lg border border-gray-100 bg-white p-6 sm:p-8"
+      className="rounded-2xl shadow-lg border border-edge bg-surface p-6 sm:p-8"
     >
       <h2
         id="currently-heading"
-        className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-4"
+        className="text-sm font-semibold uppercase tracking-wide text-muted mb-4"
       >
         Currently
       </h2>
@@ -105,10 +105,10 @@ export default function CurrentlySection() {
                   {item.emoji}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                  <p className="text-xs font-medium uppercase tracking-wide text-faint">
                     {item.label}
                   </p>
-                  <p className="text-lg font-semibold text-gray-900 truncate">
+                  <p className="text-lg font-semibold text-app truncate">
                     {item.value}
                   </p>
                 </div>

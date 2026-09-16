@@ -1,18 +1,77 @@
 @import "tailwindcss";
 
+/*
+ * Dark mode is class-based (manual toggle), not OS-forced. Anything under an
+ * element with `.dark` (we put it on <html>) gets the dark token values.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
+  /* Brand palette (sky blue) — constant across themes. */
   --color-brand-50: #f0f9ff;
   --color-brand-500: #0ea5e9;
   --color-brand-700: #0369a1;
   --color-brand-900: #0c4a6e;
+
   --font-family-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-family-mono: var(--font-geist-mono), monospace;
+
+  /*
+   * Semantic tokens — the actual colors components should use. They point at
+   * the light/dark values defined in :root / .dark below, so utilities like
+   * `bg-surface` or `text-muted` re-theme automatically with no `dark:` variant.
+   */
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-raised: var(--surface-raised);
+  --color-app: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-edge: var(--border);
+  /* Visible divider/outline in BOTH themes — for structural lines (header,
+     footer, timeline) and outlined buttons/chips, unlike `border-app` which
+     is transparent in light mode so cards stay shadow-only. */
+  --color-line: var(--line);
+  /* Theme-aware brand accent (brighter in dark so it reads on slate). */
+  --color-accent: var(--accent);
+}
+
+/* Light theme (default) */
+:root {
+  --surface: #ffffff; /* cards, header, drawers */
+  --surface-muted: #f8fafc; /* page canvas (slate-50) */
+  --surface-raised: #f1f5f9; /* subtly raised fills (slate-100) */
+  --text: #0f172a; /* slate-900 */
+  --text-muted: #475569; /* slate-600 */
+  --text-faint: #94a3b8; /* slate-400 */
+  /* Transparent in light mode so cards read as shadow-only (their original
+     look); the .dark override below gives them a visible slate outline. */
+  --border: transparent;
+  --line: #e2e8f0; /* slate-200 — visible dividers/buttons in light mode */
+  --accent: var(--color-brand-700);
+}
+
+/* Dark theme — soft slate canvas, not pure black. */
+.dark {
+  --surface: #1e293b; /* slate-800 — cards/header sit above the canvas */
+  --surface-muted: #0f172a; /* slate-900 — page canvas */
+  --surface-raised: #334155; /* slate-700 */
+  --text: #e2e8f0; /* slate-200 */
+  --text-muted: #94a3b8; /* slate-400 */
+  --text-faint: #64748b; /* slate-500 */
+  --border: #334155; /* slate-700 */
+  --line: #334155; /* slate-700 — same as card borders in dark */
+  --accent: var(--color-brand-500); /* brighter blue on dark */
 }
 
 body {
   font-size: clamp(0.875rem, 1.5vw, 1.25rem);
-  background-color: #f8fafc; /* slate-50 */
-  color: #0f172a; /* slate-900 */
+  background-color: var(--surface-muted);
+  color: var(--text);
+  /* Smooth the switch, but don't animate page navigations. */
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 *:focus-visible {

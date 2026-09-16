@@ -35,12 +35,10 @@ export default function TravelMapClient({ locations }: TravelMapClientProps) {
                 className={`rounded-full border px-3 py-1 text-sm transition-colors ${
                   isSelected
                     ? "border-transparent text-white"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
+                    : "border-line bg-surface text-app hover:border-faint"
                 }`}
                 style={
-                  isSelected
-                    ? { backgroundColor: "var(--color-brand-700)" }
-                    : undefined
+                  isSelected ? { backgroundColor: "var(--accent)" } : undefined
                 }
               >
                 {location.name}

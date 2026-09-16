@@ -19,11 +19,11 @@ export default function ExperienceItem({ company }: ExperienceItemProps) {
       {/* Company header */}
       <p
         className="text-base font-semibold mb-2"
-        style={{ color: "var(--color-brand-700)" }}
+        style={{ color: "var(--accent)" }}
       >
         {name}
         {location && (
-          <span className="text-gray-500 font-normal"> · {location}</span>
+          <span className="text-muted font-normal"> · {location}</span>
         )}
       </p>
 
@@ -32,11 +32,9 @@ export default function ExperienceItem({ company }: ExperienceItemProps) {
         {roles.map((role, index) => (
           <div key={`${role.title}-${role.startDate}-${index}`}>
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 mb-2">
-              <h3 className="text-base font-semibold text-gray-900">
-                {role.title}
-              </h3>
+              <h3 className="text-base font-semibold text-app">{role.title}</h3>
               <time
-                className="text-sm text-gray-500 shrink-0 sm:text-right"
+                className="text-sm text-muted shrink-0 sm:text-right"
                 dateTime={`${role.startDate}/${role.endDate === "present" ? "" : role.endDate}`}
               >
                 {formatDate(role.startDate)} – {formatDate(role.endDate)}
@@ -46,10 +44,7 @@ export default function ExperienceItem({ company }: ExperienceItemProps) {
             {role.bullets.length > 0 && (
               <ul className="list-disc list-outside pl-5 space-y-1">
                 {role.bullets.map((bullet, bi) => (
-                  <li
-                    key={bi}
-                    className="text-gray-700 leading-relaxed text-sm"
-                  >
+                  <li key={bi} className="text-app leading-relaxed text-sm">
                     {bullet}
                   </li>
                 ))}

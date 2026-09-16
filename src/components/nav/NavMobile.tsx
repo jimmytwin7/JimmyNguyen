@@ -83,19 +83,21 @@ export default function NavMobile() {
         aria-label="Mobile navigation"
         className={[
           "fixed top-0 right-0 h-full w-72 max-w-[80vw] z-[101]",
-          "bg-white shadow-2xl flex flex-col",
+          "bg-surface shadow-2xl flex flex-col",
           "transition-transform ease-out",
           isVisible ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
         style={{ transitionDuration: `${ANIM_MS}ms` }}
       >
-        <div className="flex items-center justify-between px-5 h-16 border-b border-gray-100">
-          <span className="font-semibold text-lg tracking-tight">Menu</span>
+        <div className="flex items-center justify-between px-5 h-16 border-b border-line">
+          <span className="font-semibold text-lg tracking-tight text-app">
+            Menu
+          </span>
           <button
             type="button"
             aria-label="Close menu"
             onClick={close}
-            className="p-2 -mr-2 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            className="p-2 -mr-2 rounded-lg text-muted hover:bg-surface-raised hover:text-app transition-colors"
           >
             <svg
               aria-hidden="true"
@@ -120,7 +122,7 @@ export default function NavMobile() {
               <NavLink
                 href={href}
                 onClick={close}
-                className="block py-3 px-4 rounded-lg text-base text-gray-700 hover:bg-gray-50 no-underline hover:no-underline"
+                className="block py-3 px-4 rounded-lg text-base text-app hover:bg-surface-raised no-underline hover:no-underline"
               >
                 {label}
               </NavLink>
@@ -140,7 +142,7 @@ export default function NavMobile() {
         aria-expanded={isOpen}
         aria-controls={DRAWER_ID}
         onClick={open}
-        className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+        className="p-2 rounded-lg text-app hover:bg-surface-raised transition-colors"
       >
         <svg
           aria-hidden="true"

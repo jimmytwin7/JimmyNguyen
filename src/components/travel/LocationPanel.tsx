@@ -19,8 +19,8 @@ export default function LocationPanel({
   // Nothing selected yet — prompt the user
   if (!location) {
     return (
-      <div className="rounded-2xl border border-dashed border-gray-200 bg-white/60 p-8 text-center">
-        <p className="text-gray-500">
+      <div className="rounded-2xl border border-dashed border-line bg-surface/60 p-8 text-center">
+        <p className="text-muted">
           Pick a pin on the map to see where I&apos;ve been.
         </p>
       </div>
@@ -32,30 +32,30 @@ export default function LocationPanel({
   return (
     <section
       aria-labelledby="location-heading"
-      className="rounded-2xl border border-gray-100 bg-white p-6 sm:p-8 shadow-sm"
+      className="rounded-2xl border border-edge bg-surface p-6 sm:p-8 shadow-sm"
     >
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h2
             id="location-heading"
-            className="text-xl font-bold tracking-tight text-gray-900"
+            className="text-xl font-bold tracking-tight text-app"
           >
             {location.name}
           </h2>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted">
             {location.region} · {location.country}
           </p>
         </div>
         <button
           type="button"
           onClick={onClear}
-          className="shrink-0 rounded-lg px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+          className="shrink-0 rounded-lg px-3 py-1.5 text-sm text-muted hover:bg-surface-raised hover:text-app transition-colors"
         >
           Reset map
         </button>
       </div>
 
-      <p className="text-gray-700 leading-relaxed mb-6">{location.blurb}</p>
+      <p className="text-app leading-relaxed mb-6">{location.blurb}</p>
 
       {hasPhotos ? (
         <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -65,7 +65,7 @@ export default function LocationPanel({
                 type="button"
                 onClick={() => setLightboxIndex(i)}
                 aria-label={`View ${location.name} photo ${i + 1} full screen`}
-                className="group relative block aspect-square w-full overflow-hidden rounded-lg bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                className="group relative block aspect-square w-full overflow-hidden rounded-lg bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                 style={{ cursor: "zoom-in" }}
               >
                 <Image
@@ -81,8 +81,8 @@ export default function LocationPanel({
           ))}
         </ul>
       ) : (
-        <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-          <p className="text-sm text-gray-500">
+        <div className="rounded-xl border border-dashed border-line bg-surface-muted p-8 text-center">
+          <p className="text-sm text-muted">
             Photos from {location.name} coming soon.
           </p>
         </div>
