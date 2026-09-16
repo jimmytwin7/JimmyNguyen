@@ -13,16 +13,18 @@ export const visitedCountryIds: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * The travel map's location metadata — the single source of truth for names,
+ * The travel map's locations — the single source of truth for names,
  * coordinates, and blurbs.
  *
- * Photos are NOT listed here. They're stored in Cloudinary under
- * `travel/<id>/` and fetched automatically at build time, so adding photos is
- * just uploading to the right folder — no code change needed.
+ * Photos are not listed here. Upload them to the Cloudinary folder
+ * `travel/<id>` and run `npm run refresh:photos`; the generated manifest is
+ * merged in by `loader.ts`.
  *
- * `id` must match the Cloudinary folder name. `coordinates` are
- * [longitude, latitude] — the order d3-geo expects, reverse of Google Maps.
- * `zoom` is the react-simple-maps scale: 6 for cities/regions, 7 for parks.
+ * Field notes:
+ * - `id` must match the Cloudinary folder name — that's how photos are matched.
+ * - `coordinates` are [longitude, latitude], the order d3-geo expects. This is
+ *   the reverse of what Google Maps shows you.
+ * - `zoom` is the react-simple-maps scale: 6 frames a city, 7 a park.
  */
 export const travelLocations: TravelLocationMeta[] = [
   {

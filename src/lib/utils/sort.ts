@@ -1,15 +1,15 @@
-import type { Company } from '../data/experience';
+import type { Company } from "../data/experience";
 
 /**
- * Returns a new array of Company sorted reverse-chronologically (most recent first).
- * Sort key is the latest endDate across all roles in the company.
- * "present" is treated as the highest possible date value so current roles always appear first.
+ * Sorts companies reverse-chronologically (most recent first).
  *
- * Does not mutate the original array.
+ * The sort key is the latest `endDate` across all of a company's roles, so a
+ * company with any current role floats to the top. `"present"` is treated as
+ * the largest possible date. Returns a new array; the input is not mutated.
  */
 export function reverseChronological(entries: Company[]): Company[] {
-  const toMs = (d: string | 'present'): number =>
-    d === 'present' ? Number.MAX_SAFE_INTEGER : new Date(d).getTime();
+  const toMs = (d: string | "present"): number =>
+    d === "present" ? Number.MAX_SAFE_INTEGER : new Date(d).getTime();
 
   const latestEndDate = (company: Company): number =>
     Math.max(...company.roles.map((r) => toMs(r.endDate)));

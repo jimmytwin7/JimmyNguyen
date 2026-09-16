@@ -1,6 +1,8 @@
 /**
- * Authored metadata for a travel destination. Photos are NOT listed here —
- * they're fetched from Cloudinary at build time (see cloudinaryPhotos.ts).
+ * Hand-authored metadata for a travel destination (see `locations.ts`).
+ *
+ * Photos are deliberately not listed here — they come from the generated
+ * `photos.manifest.json` and are merged in by `loader.ts`.
  */
 export interface TravelLocationMeta {
   /**
@@ -38,9 +40,8 @@ export interface TravelPhoto {
 }
 
 /**
- * A location with its photos resolved. This is what the page and components
- * consume. `photos` is populated at load time from Cloudinary; an empty array
- * renders a "photos coming soon" state.
+ * A location with its photos resolved — what the page and components consume.
+ * An empty `photos` array renders the "photos coming soon" state.
  */
 export interface TravelLocation extends TravelLocationMeta {
   photos: TravelPhoto[];

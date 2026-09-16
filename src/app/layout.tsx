@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -35,13 +36,13 @@ export default function RootLayout({
         <CursorDot />
         <header className="sticky top-0 z-30 border-b bg-white/90 backdrop-blur-sm">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <a
+            <Link
               href="/"
               className="font-semibold text-lg tracking-tight"
               style={{ color: "var(--color-brand-700)" }}
             >
               Jimmy Nguyen
-            </a>
+            </Link>
             <Nav />
           </div>
         </header>

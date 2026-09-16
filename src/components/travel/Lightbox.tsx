@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import type { TravelPhoto } from "@/lib/travel/types";
+
+/** Aspect ratio used before the active image reports its real dimensions. */
+const DEFAULT_ASPECT = 1.5;
+/** Minimum horizontal travel (px) before a touch counts as a navigation swipe. */
+const SWIPE_MIN_PX = 50;
 
 interface LightboxProps {
   photos: TravelPhoto[];
@@ -143,12 +148,17 @@ export default function Lightbox({
   onIndexChange,
   locationName,
 }: LightboxProps) {
+  // createPortal needs `document`, which only exists on the client.
   const [portalReady, setPortalReady] = useState(false);
   useEffect(() => setPortalReady(true), []);
 
-  // Aspect ratio of the active image, so its box hugs the photo exactly and the
-  // caption can sit against its real right edge. Defaults to 3:2 until loaded.
-  const [aspect, setAspect] = useState(1.5);
+  // Aspect ratio of the active image, so the image box hugs the photo and the
+  // caption bar lands on its real bottom edge. 3:2 until the image loads.
+  const [aspect, setAspect] = useState(DEFAULT_ASPECT);
+
+  // Swipe tracking lives in a ref so it survives re-renders (plain locals would
+  // reset on every render, and state would re-render mid-gesture).
+  const swipe = useRef({ tracking: false, x: 0, y: 0 });
 
   const isOpen = index !== null;
 
@@ -194,32 +204,30 @@ export default function Lightbox({
   const go = (delta: number) =>
     onIndexChange((index + delta + photos.length) % photos.length);
 
-  // Swipe-to-navigate (mobile). Track the touch start; on release, if it was a
-  // mostly-horizontal swipe past a threshold, change photos. A single-touch
-  // guard avoids interfering with pinch-zoom (two fingers).
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let touchTracking = false;
-
   const onTouchStart = (e: React.TouchEvent) => {
+    // Only track single-finger gestures so pinch-zoom isn't read as a swipe.
     if (e.touches.length !== 1) {
-      touchTracking = false;
+      swipe.current.tracking = false;
       return;
     }
-    touchTracking = true;
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
+    swipe.current = {
+      tracking: true,
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
-    if (!touchTracking || !hasMultiple) return;
-    touchTracking = false;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    // Require a clear horizontal swipe: enough distance, and more horizontal
-    // than vertical (so vertical scrolls/pans don't trigger navigation).
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      go(dx < 0 ? 1 : -1); // swipe left → next, swipe right → prev
+    if (!swipe.current.tracking || !hasMultiple) return;
+    swipe.current.tracking = false;
+
+    const dx = e.changedTouches[0].clientX - swipe.current.x;
+    const dy = e.changedTouches[0].clientY - swipe.current.y;
+
+    // Require a decisive horizontal swipe so vertical drags and small wobbles
+    // don't flip photos.
+    if (Math.abs(dx) > SWIPE_MIN_PX && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      go(dx < 0 ? 1 : -1); // left → next, right → prev
     }
   };
 
