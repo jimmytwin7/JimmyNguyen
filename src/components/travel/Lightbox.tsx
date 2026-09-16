@@ -194,6 +194,35 @@ export default function Lightbox({
   const go = (delta: number) =>
     onIndexChange((index + delta + photos.length) % photos.length);
 
+  // Swipe-to-navigate (mobile). Track the touch start; on release, if it was a
+  // mostly-horizontal swipe past a threshold, change photos. A single-touch
+  // guard avoids interfering with pinch-zoom (two fingers).
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchTracking = false;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) {
+      touchTracking = false;
+      return;
+    }
+    touchTracking = true;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchTracking || !hasMultiple) return;
+    touchTracking = false;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    // Require a clear horizontal swipe: enough distance, and more horizontal
+    // than vertical (so vertical scrolls/pans don't trigger navigation).
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      go(dx < 0 ? 1 : -1); // swipe left → next, swipe right → prev
+    }
+  };
+
   // The mounted window: current, next, prev (deduped for tiny galleries).
   const windowIdx = Array.from(
     new Set([
@@ -261,23 +290,20 @@ export default function Lightbox({
         </button>
       )}
 
-      {/* Image + caption grouped and centered together, so the caption sits
-          directly to the right of the image (not the screen edge). On mobile it
-          stacks and the caption overlays the image bottom. stopPropagation so
-          gestures/clicks here don't close the lightbox. */}
       {/* Image box sized to the photo's aspect ratio so its edges match the
-          visible photo. Centered in the viewport; the caption is absolutely
-          positioned against its right edge so the image itself stays centered. */}
+          visible photo, and the caption bar can sit flush on the image bottom.
+          Centered in the viewport. */}
       <div
         className="relative"
         style={{
           aspectRatio: String(aspect),
           maxHeight: "85vh",
           maxWidth: "90vw",
-          // Fill available space up to the caps while keeping the ratio.
           height: "85vh",
         }}
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
       >
         {windowIdx.map((i) => (
           <PhotoLayer
@@ -289,24 +315,15 @@ export default function Lightbox({
           />
         ))}
 
-        {/* Mobile-only caption overlay on the image bottom */}
+        {/* Caption bar overlaid on the image bottom, with a gradient scrim so
+            text stays legible over any photo. Same treatment on all screens —
+            the conventional gallery-lightbox pattern. */}
         {photos[index].caption && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-4 pt-10 md:hidden">
-            <p className="text-sm font-medium text-white drop-shadow">
+          <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-lg bg-gradient-to-t from-black/75 via-black/45 to-transparent px-4 pb-4 pt-12 sm:px-6 sm:pb-5">
+            <p className="mx-auto max-w-3xl text-center text-sm font-medium leading-snug text-white sm:text-base">
               {photos[index].caption}
             </p>
-          </div>
-        )}
-
-        {/* Desktop caption, pinned immediately to the right of the image edge */}
-        {photos[index].caption && (
-          <aside className="absolute left-full top-1/2 ml-6 hidden w-64 -translate-y-1/2 md:block">
-            <div className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-              <p className="text-lg leading-relaxed text-white">
-                {photos[index].caption}
-              </p>
-            </div>
-          </aside>
+          </figcaption>
         )}
       </div>
 

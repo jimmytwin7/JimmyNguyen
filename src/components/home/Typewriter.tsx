@@ -13,7 +13,7 @@ interface TypewriterProps {
 
 export default function Typewriter({
   text,
-  speed = 140,
+  speed = 100,
   startDelay = 0,
 }: TypewriterProps) {
   // Start with the full text so SSR and the first client render match (no

@@ -37,7 +37,7 @@ export const travelLocations: TravelLocationMeta[] = [
   },
   {
     id: "saigon-vietnam",
-    name: "Saigon",
+    name: "Saigon, Vietnam",
     region: "Ho Chi Minh City",
     country: "Vietnam",
     coordinates: [106.6297, 10.8231],
@@ -46,7 +46,7 @@ export const travelLocations: TravelLocationMeta[] = [
   },
   {
     id: "hanoi-vietnam",
-    name: "Hanoi",
+    name: "Hanoi, Vietnam",
     region: "Hanoi",
     country: "Vietnam",
     coordinates: [105.8342, 21.0278],
@@ -56,7 +56,7 @@ export const travelLocations: TravelLocationMeta[] = [
   },
   {
     id: "ha-giang-vietnam",
-    name: "Ha Giang",
+    name: "Ha Giang, Vietnam",
     region: "Ha Giang",
     country: "Vietnam",
     coordinates: [104.9784, 22.8233],
@@ -65,13 +65,41 @@ export const travelLocations: TravelLocationMeta[] = [
       "The best experience in all of southeast asia, a 4 day 3 night motorbike tour",
   },
   {
+    id: "ninh-binh-vietnam",
+    name: "Ninh Binh, Vietnam",
+    region: "Ninh Binh",
+    country: "Vietnam",
+    coordinates: [105.975, 20.2506],
+    zoom: 6,
+    blurb:
+      "Limestone karsts rising out of the rice paddies — rowboat rides through river caves and endless green from the mountaintop pagodas.",
+  },
+  {
     id: "seattle-washington",
-    name: "Seattle",
+    name: "Seattle, USA",
     region: "Washington",
     country: "United States",
     coordinates: [-122.3321, 47.6062],
     zoom: 6,
     blurb: "When I got the one rainy weekend after 8 weeks of sunshine",
+  },
+  {
+    id: "chicago",
+    name: "Chicago, USA",
+    region: "Illinois",
+    country: "United States",
+    coordinates: [-87.6298, 41.8781],
+    zoom: 6,
+    blurb: "The windy city",
+  },
+  {
+    id: "new-york",
+    name: "New York, USA",
+    region: "New York",
+    country: "United States",
+    coordinates: [-74.006, 40.7128],
+    zoom: 6,
+    blurb: "The big apple",
   },
   {
     id: "zion-national-park",
@@ -110,6 +138,16 @@ export const travelLocations: TravelLocationMeta[] = [
     coordinates: [-86.0586, 44.8619],
     zoom: 7,
     blurb:
-      "Sand bluffs dropping straight into Lake Michigan, many enjoy the challenge",
+      "One of three National Lakeshores. Sand bluffs dropping straight into Lake Michigan, many enjoy the challenge",
+  },
+  {
+    id: "mackinac-island",
+    name: "Mackinac Island, Michigan",
+    region: "Michigan",
+    country: "United States",
+    coordinates: [-84.6189, 45.8492],
+    zoom: 7,
+    blurb:
+      "No cars allowed — just bikes, horse-drawn carriages, and fudge. Victorian charm on an island in Lake Huron.",
   },
 ];
