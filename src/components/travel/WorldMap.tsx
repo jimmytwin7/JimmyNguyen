@@ -362,11 +362,7 @@ export default function WorldMap({
                         bump so the map still feels responsive. */}
                     <g
                       transform={`scale(${
-                        isSelected
-                          ? 3.5
-                          : hoveredPinId === location.id
-                            ? 1.5
-                            : 2.5
+                        isSelected ? 2 : hoveredPinId === location.id ? 1.5 : 1
                       })`}
                       style={{ transition: "transform 0.2s ease" }}
                     >
