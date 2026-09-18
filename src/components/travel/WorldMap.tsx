@@ -179,13 +179,36 @@ export default function WorldMap({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-edge shadow-sm">
+    /*
+     * The map is hidden from assistive tech on purpose.
+     *
+     * react-simple-maps renders every country and US state as an SVG <path>,
+     * and screen readers announce each one as "graphic symbol" — hundreds of
+     * meaningless stops. There's no way to label them usefully, so the whole
+     * visualisation is treated as presentational and the "Jump to a location"
+     * button list in TravelMapClient is the accessible equivalent: it exposes
+     * every location as a real button with the same behaviour.
+     *
+     * Because this subtree is aria-hidden, nothing inside it may be focusable
+     * (a focusable aria-hidden element is an ARIA violation), so the pins are
+     * mouse/touch only — see the Marker tabIndex={-1} below.
+     */
+    <div
+      aria-hidden="true"
+      className="overflow-hidden rounded-2xl border border-edge shadow-sm"
+    >
       <ComposableMap
         projection="geoEqualEarth"
         width={900}
         height={450}
         className="w-full h-auto"
         style={{ backgroundColor: palette.ocean }}
+        // aria-hidden on the wrapping <div> alone does not reliably suppress
+        // SVG internals in Safari/VoiceOver, so it's repeated here on the <svg>
+        // itself and on each shape below.
+        aria-hidden="true"
+        role="presentation"
+        focusable="false"
       >
         <ZoomableGroup
           center={view.coordinates}
@@ -198,8 +221,15 @@ export default function WorldMap({
             fill={palette.ocean}
             stroke={palette.graticule}
             strokeWidth={0.5}
+            aria-hidden="true"
+            focusable="false"
           />
-          <Graticule stroke={palette.graticule} strokeWidth={0.5} />
+          <Graticule
+            stroke={palette.graticule}
+            strokeWidth={0.5}
+            aria-hidden="true"
+            focusable="false"
+          />
 
           <Geographies geography={GEO_URL}>
             {({ geographies }) =>
@@ -225,6 +255,11 @@ export default function WorldMap({
                       visited ? palette.visitedStroke : palette.landStroke
                     }
                     strokeWidth={visited ? 0.7 : 0.4}
+                    // Decorative: VoiceOver otherwise announces every country
+                    // path as "graphic symbol".
+                    aria-hidden="true"
+                    focusable="false"
+                    tabIndex={-1}
                     style={{ outline: "none", transition: "fill 0.2s ease" }}
                   />
                 );
@@ -243,6 +278,9 @@ export default function WorldMap({
                   fill="transparent"
                   stroke={palette.stateLine}
                   strokeWidth={0.3}
+                  aria-hidden="true"
+                  focusable="false"
+                  tabIndex={-1}
                   style={{
                     outline: "none",
                     pointerEvents: "none",
@@ -262,6 +300,9 @@ export default function WorldMap({
                 <Marker
                   key={`city-${city.name}-${city.coordinates[0]}`}
                   coordinates={city.coordinates}
+                  aria-hidden="true"
+                  focusable="false"
+                  tabIndex={-1}
                   style={{ pointerEvents: "none" }}
                 >
                   <g transform={`scale(${s})`} pointerEvents="none">
@@ -290,20 +331,16 @@ export default function WorldMap({
                 onClick={() => onSelect(location)}
                 onMouseEnter={() => setHoveredPinId(location.id)}
                 onMouseLeave={() => setHoveredPinId(null)}
-                onFocus={() => setHoveredPinId(location.id)}
-                onBlur={() => setHoveredPinId(null)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onSelect(location);
-                  }
-                }}
-                tabIndex={0}
-                role="button"
-                aria-label={`${location.name}, ${location.country}`}
-                aria-pressed={isSelected}
-                className="cursor-pointer focus:outline-none"
-                style={{ cursor: "pointer" }}
+                // Not focusable or exposed: the map is presentational and the
+                // button list is the keyboard/screen-reader equivalent.
+                aria-hidden="true"
+                focusable="false"
+                tabIndex={-1}
+                className="cursor-pointer"
+                // outline:none because tabIndex={-1} still lets a click focus
+                // the node — selection is conveyed by the pin scaling up
+                // instead of a focus ring.
+                style={{ cursor: "pointer", outline: "none" }}
               >
                 <motion.g
                   initial={{ opacity: 0, y: -18 }}
@@ -320,8 +357,17 @@ export default function WorldMap({
                         identically on every browser (unlike the 📍 emoji).
                         The path's tip is at (0,0), so it plants on the point.
                         Scaled up a touch when selected. */}
+                    {/* Selection is shown by scaling the pin up — the only cue
+                        now that there's no focus ring. Hover gets a smaller
+                        bump so the map still feels responsive. */}
                     <g
-                      transform={`scale(${isSelected ? 1.25 : 1})`}
+                      transform={`scale(${
+                        isSelected
+                          ? 3.5
+                          : hoveredPinId === location.id
+                            ? 1.5
+                            : 2.5
+                      })`}
                       style={{ transition: "transform 0.2s ease" }}
                     >
                       {/* soft shadow under the tip */}

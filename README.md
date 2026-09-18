@@ -167,8 +167,8 @@ no runtime data dependency:
 - `cities-1m.json` — cities over 1M people, labeled once you zoom past a
   threshold so the world view stays uncluttered
 
-Zoom and pan are handled by `react-zoom-pan-pinch`, which gives trackpad,
-wheel, and pinch gestures for free.
+Zoom and pan come from react-simple-maps' own `ZoomableGroup`. (The separate
+`react-zoom-pan-pinch` dependency is used by the photo lightbox, not the map.)
 
 ### Adding a location
 
@@ -279,11 +279,24 @@ whole set, so opening a large gallery doesn't pull down every full-size image.
 
 ## Accessibility
 
-Map pins are real focusable controls (`tabIndex`, `role="button"`, Enter/Space
-handlers, `aria-label`, `aria-pressed`), and the pill buttons under the map
-select the same locations — so the feature is fully usable without touching the
-SVG. Interactive regions use `aria-labelledby` / `aria-live` where relevant, and
-the mobile nav manages focus explicitly.
+**The travel map is `aria-hidden` on purpose.** react-simple-maps renders every
+country and US state as an SVG `<path>`, which screen readers announce as
+"graphic symbol" — hundreds of unlabelled, meaningless stops that make the page
+far worse to navigate. Those shapes can't be usefully labelled, so the whole
+visualisation is marked presentational.
+
+The accessible equivalent is the **"Jump to a location" list** beneath it: a
+labelled `<nav>` of real `<button>`s, one per location, with `aria-pressed`
+reflecting the current selection. It does everything the pins do. Because the
+map subtree is `aria-hidden`, the pins are deliberately **not** focusable
+(`tabIndex={-1}`) — a focusable element inside `aria-hidden` is an ARIA
+violation — so they're a mouse/touch affordance only.
+
+`LocationPanel` carries `aria-live="polite"`, so choosing a location announces
+the resulting detail panel rather than changing silently.
+
+Elsewhere: interactive regions use `aria-labelledby` where relevant, and the
+mobile nav traps and restores focus explicitly.
 
 ## Deployment
 

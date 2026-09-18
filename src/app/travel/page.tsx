@@ -16,7 +16,8 @@ export default function TravelPage() {
           Travel
         </h1>
         <p className="text-muted text-lg">
-          {locations.length} places so far. Click a pin to zoom in.
+          {locations.length} places so far. Pick a pin on the map, or choose one
+          from the list below it.
         </p>
       </header>
 
