@@ -44,7 +44,8 @@ export const travelLocations: TravelLocationMeta[] = [
     country: "Vietnam",
     coordinates: [106.6297, 10.8231],
     zoom: 6,
-    blurb: "Organized chaos, great food, so much to do",
+    blurb:
+      "A city of controlled chaos, delicious food, and shopping. Time here was limited to two days but I will be back to explore more.",
   },
   {
     id: "hanoi-vietnam",
@@ -54,7 +55,7 @@ export const travelLocations: TravelLocationMeta[] = [
     coordinates: [105.8342, 21.0278],
     zoom: 6,
     blurb:
-      "Narrow Old Quarter alleys, egg coffee, salted cream coffee, and Bun Cha",
+      "Egg coffee, salted cream coffee, and Bun Cha! Much narrower roads compared to Saigon",
   },
   {
     id: "ha-giang-vietnam",
@@ -64,7 +65,7 @@ export const travelLocations: TravelLocationMeta[] = [
     coordinates: [104.9784, 22.8233],
     zoom: 6,
     blurb:
-      "The best experience in all of southeast asia, a 4 day 3 night motorbike tour",
+      "The best experience in all of southeast asia, a 4 day 3 night motorbike tour through the UNESCO-protected Dong Van Karst Plateau Geopark, steep mountain passes like the dramatic Mã Pì Lèng Pass, deep canyons, terraced rice fields, and traditional ethnic minority villages",
   },
   {
     id: "ninh-binh-vietnam",
@@ -74,7 +75,7 @@ export const travelLocations: TravelLocationMeta[] = [
     coordinates: [105.975, 20.2506],
     zoom: 6,
     blurb:
-      "Limestone karsts rising out of the rice paddies — rowboat rides through river caves and endless green from the mountaintop pagodas.",
+      "Nicknamed Ha Long Bay on land, famous for its dramatic limestone mountains rising out of green rice paddies.",
   },
   {
     id: "seattle-washington",
@@ -83,7 +84,8 @@ export const travelLocations: TravelLocationMeta[] = [
     country: "United States",
     coordinates: [-122.3321, 47.6062],
     zoom: 6,
-    blurb: "When I got the one rainy weekend after 8 weeks of sunshine",
+    blurb:
+      "When I got the one rainy weekend after 8 weeks of sunshine. Didn't get to see Rainer in this weather.",
   },
   {
     id: "chicago",
@@ -120,8 +122,7 @@ export const travelLocations: TravelLocationMeta[] = [
     country: "United States",
     coordinates: [-112.1129, 36.1069],
     zoom: 7,
-    blurb:
-      "A mile deep and impossible to photograph at scale. Worth seeing at sunrise.",
+    blurb: "Absolutely massive, my first national park!",
   },
   {
     id: "bryce-canyon",
@@ -130,7 +131,7 @@ export const travelLocations: TravelLocationMeta[] = [
     country: "United States",
     coordinates: [-112.1871, 37.593],
     zoom: 7,
-    blurb: "Hoodoo amphitheaters that glow orange when the light hits right.",
+    blurb: "Hoodoos on hoodoos, beautiful bright orange.",
   },
   {
     id: "sleeping-bear-dunes",
@@ -140,7 +141,7 @@ export const travelLocations: TravelLocationMeta[] = [
     coordinates: [-86.0586, 44.8619],
     zoom: 7,
     blurb:
-      "One of three National Lakeshores. Sand bluffs dropping straight into Lake Michigan, many enjoy the challenge",
+      "One of three National Lakeshores. 60 seconds down, 60 minutes up. A 450 ft dune, rescue cost is $3000",
   },
   {
     id: "mackinac-island",
@@ -149,7 +150,6 @@ export const travelLocations: TravelLocationMeta[] = [
     country: "United States",
     coordinates: [-84.6189, 45.8492],
     zoom: 7,
-    blurb:
-      "No cars allowed — just bikes, horse-drawn carriages, and fudge. Victorian charm on an island in Lake Huron.",
+    blurb: "No cars allowed, just bikes, horse-drawn carriages, and fudge.",
   },
 ];
