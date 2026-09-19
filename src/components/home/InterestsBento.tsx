@@ -28,11 +28,17 @@ const INTERESTS: Interest[] = [
     back: [
       {
         heading: "Currently watching",
-        items: ["Dr. Stone", "One Piece"],
+        items: ["Dr. Stone", "One Piece (Caught up)"],
       },
       {
         heading: "Favorites",
-        items: ["Hunter x Hunter", "Attack on Titan", "Naruto", "Demon Slayer"],
+        items: [
+          "Hunter x Hunter",
+          "Attack on Titan",
+          "Naruto",
+          "Black Clover",
+          "Demon Slayer",
+        ],
       },
     ],
   },
@@ -43,14 +49,14 @@ const INTERESTS: Interest[] = [
     span: "sm:col-span-1",
     back: [
       {
-        heading: "Minnesota teams",
+        heading: "Minnesota fan!",
         items: ["Timberwolves", "Vikings", "Twins", "Wild"],
       },
     ],
   },
   {
     label: "Running",
-    emoji: "",
+    emoji: "🏃",
     gradient: "from-sky-500 via-cyan-500 to-teal-500",
     span: "sm:col-span-1 sm:row-span-1",
   },
