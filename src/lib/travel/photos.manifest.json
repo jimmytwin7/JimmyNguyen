@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-16T18:22:36.377Z",
+  "generatedAt": "2026-09-30T23:29:14.251Z",
   "photosByLocation": {
     "banff-alberta": [
       {
@@ -105,7 +105,8 @@
         "label": "IMG_0030",
         "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_0030",
         "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_0030",
-        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_0030"
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_0030",
+        "caption": "View of Notre Dame Cathedral, on Book Street"
       },
       {
         "id": "IMG_0192",
@@ -120,14 +121,16 @@
         "label": "IMG_8542",
         "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_8542",
         "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_8542",
-        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_8542"
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_8542",
+        "caption": "Pizza in Vietnam?? Pizza 4P's is actual very popular"
       },
       {
         "id": "IMG_8546",
         "label": "IMG_8546",
         "url": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_1600,c_limit/IMG_8546",
         "thumbUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto,w_600,c_limit/IMG_8546",
-        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_8546"
+        "blurUrl": "https://res.cloudinary.com/mxlapddp/image/upload/f_auto,q_auto:low,w_24,e_blur:400/IMG_8546",
+        "caption": "Pasta but in Vietnam"
       },
       {
         "id": "IMG_8577",
