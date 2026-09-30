@@ -95,6 +95,12 @@ const INTERESTS: Interest[] = [
     emoji: "🍳",
     gradient: "from-amber-500 via-orange-500 to-red-500",
     span: "sm:col-span-1 sm:row-span-1 md:col-span-2",
+    back: [
+      {
+        heading: "Specalities",
+        items: ["Pad Thai, Chili, Stir Fry, Curry"],
+      },
+    ],
   },
 ];
 
