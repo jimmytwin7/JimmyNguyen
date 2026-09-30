@@ -227,7 +227,7 @@ function BentoTile({ interest }: { interest: Interest }) {
                 <span className="text-sm font-semibold text-app">
                   {interest.label}
                 </span>
-                <span className="text-xs text-faint">tap to flip back</span>
+                <span className="text-xs text-faint">tap to flip</span>
               </div>
               <div className="min-h-0 flex-1 overflow-auto pr-1 flex flex-col gap-3 md:flex-row md:gap-6">
                 {interest.back!.map((group) => (
