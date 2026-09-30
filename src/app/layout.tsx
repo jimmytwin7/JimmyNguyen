@@ -44,7 +44,14 @@ export default function RootLayout({
                 className="font-semibold text-lg tracking-tight"
                 style={{ color: "var(--accent)" }}
               >
-                Jimmy Nguyen
+                <div className="flex items-center">
+                  <img
+                    src="/header-icon.png"
+                    alt="Hey Jimmy Nguyen"
+                    className="h-10 w-auto"
+                  />
+                  <p className="p-2">Jimmy Nguyen</p>
+                </div>
               </Link>
               <div className="flex items-center gap-2">
                 <Nav />
