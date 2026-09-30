@@ -21,7 +21,7 @@ export default function HomePage() {
           </h1>
           <p className="text-lg sm:text-xl text-muted max-w-2xl mb-8 leading-relaxed min-h-[3.5em]">
             <Typewriter
-              text="Software engineer who loves building clean, fast web experiences and exploring the world one city at a time."
+              text="Software engineer. Explore my work and learn more about me!"
               speed={25}
               startDelay={3000}
             />

@@ -59,6 +59,12 @@ const INTERESTS: Interest[] = [
     emoji: "🏃",
     gradient: "from-sky-500 via-cyan-500 to-teal-500",
     span: "sm:col-span-1 sm:row-span-1",
+    back: [
+      {
+        heading: "",
+        items: ["Half Marathon Training"],
+      },
+    ],
   },
   {
     label: "Lifting",
@@ -77,12 +83,18 @@ const INTERESTS: Interest[] = [
     emoji: "🦉",
     gradient: "from-green-500 via-emerald-500 to-lime-500",
     span: "sm:col-span-1 sm:row-span-1",
+    back: [
+      {
+        heading: "",
+        items: ["Vietnamese", "Japanese"],
+      },
+    ],
   },
   {
     label: "Cooking",
     emoji: "🍳",
     gradient: "from-amber-500 via-orange-500 to-red-500",
-    span: "sm:col-span-1 sm:row-span-1",
+    span: "sm:col-span-1 sm:row-span-1 md:col-span-2",
   },
 ];
 
@@ -90,6 +102,7 @@ function BentoTile({ interest }: { interest: Interest }) {
   const ref = useRef<HTMLDivElement>(null);
   const [flipped, setFlipped] = useState(false);
   const flippable = Boolean(interest.back?.length);
+  const longTile = interest.back?.some((x) => x.items.length >= 2);
 
   // Cursor-follow tilt (disabled while flipped so it doesn't fight the flip).
   const mx = useMotionValue(0.5);
@@ -147,7 +160,7 @@ function BentoTile({ interest }: { interest: Interest }) {
         rotateY: flipped ? 0 : rotateY,
         transformPerspective: 1000,
       }}
-      className={`group relative ${interest.span} ${flippable ? "row-span-2" : ""} min-h-32 ${flippable ? "cursor-pointer" : "cursor-default"}`}
+      className={`group relative ${interest.span} ${longTile ? "row-span-2" : ""} min-h-32 ${flippable ? "cursor-pointer" : "cursor-default"}`}
     >
       {/* Inner flipper: rotates 180° on the Y axis. */}
       <motion.div

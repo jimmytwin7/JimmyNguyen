@@ -13,7 +13,7 @@ const ITEMS: CurrentlyItem[] = [
   { emoji: "🧠", label: "Learning", value: "AWS Services" },
   { emoji: "🗺️", label: "Exploring", value: "Maps & data visualization" },
   { emoji: "🩼", label: "Recovering from", value: "Broken collarbone" },
-  { emoji: "✈️", label: "Planning", value: "Southeast Asia Trip" },
+  { emoji: "✈️", label: "Planning", value: "Indonesia and Japan" },
 ];
 
 const INTERVAL_MS = 3000;
