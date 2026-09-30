@@ -28,11 +28,11 @@ export default function HomePage() {
           </p>
           <div className="flex flex-wrap gap-4">
             <Link
-              href="/resume"
+              href="/experience"
               className="inline-flex items-center px-5 py-2.5 rounded-lg font-medium text-white"
               style={{ backgroundColor: "var(--accent)" }}
             >
-              View Resume
+              View Experience
             </Link>
             <Link
               href="/travel"

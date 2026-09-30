@@ -2,7 +2,7 @@ import NavLink from "@/components/nav/NavLink";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/resume", label: "Resume" },
+  { href: "/experience", label: "Experience" },
   { href: "/travel", label: "Travel" },
 ] as const;
 

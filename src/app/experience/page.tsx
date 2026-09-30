@@ -9,7 +9,7 @@ import DownloadButton from "@/components/ui/DownloadButton";
 import SectionCard from "@/components/ui/SectionCard";
 
 export const metadata = {
-  title: "Resume — Jimmy Nguyen",
+  title: "Experience — Jimmy Nguyen",
   description:
     "Professional experience, skills, and education for Jimmy Nguyen.",
 };
@@ -22,9 +22,10 @@ export default function ResumePage() {
       {/* Professional Summary */}
       <SectionCard id="summary-heading" title="Professional Summary" as="h1">
         <p className="text-app leading-relaxed max-w-3xl">
-          Software Engineer with experience in financial services building
+          Software Engineer with experience in financial services, building
           React-based client web applications integrated with headless CMS and
-          RESTful services
+          RESTful services. Passionate about front-end development, software
+          architecture, and cloud-native technologies.
         </p>
         <div className="mt-6">
           <DownloadButton />
