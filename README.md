@@ -1,6 +1,6 @@
 # JimmyNguyen
 
-Personal portfolio site — a resume page and an interactive travel map, built as
+Personal portfolio site — an experience page and an interactive travel map, built as
 a fully static Next.js app with no database, CMS, or API routes.
 
 **Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 ·
@@ -23,7 +23,26 @@ credentials are only required if you want to re-sync travel photos — see
 | `npm run build`          | Production build                                  |
 | `npm start`              | Serve the production build                        |
 | `npm run lint`           | ESLint (flat config, `eslint-config-next`)        |
+| `npm run format`         | Format the whole project with Prettier            |
+| `npm run format:check`   | Check formatting without writing (CI / hook)      |
 | `npm run refresh:photos` | Re-sync the travel photo manifest from Cloudinary |
+
+## Code quality
+
+A Git **pre-commit hook** enforces linting and formatting so nothing
+unformatted or lint-breaking lands in history.
+
+- **[Husky](https://typicode.github.io/husky/)** manages the hook, and
+  **[lint-staged](https://github.com/lint-staged/lint-staged)** runs the checks
+  against only the files you've staged (fast — it doesn't scan the whole repo).
+- On every `git commit`, staged files are checked with **ESLint** and
+  **Prettier**. If either reports a problem, the commit is **blocked** until
+  it's fixed.
+- The hook is wired through the `prepare` script, so it installs automatically
+  when someone runs `npm install` after cloning — no manual setup.
+
+Prettier config lives in `.prettierrc.json` and the hook in `.husky/pre-commit`.
+Run `npm run format` to auto-fix formatting before committing.
 
 ## Architecture
 
@@ -34,12 +53,12 @@ request time, no API layer, and nothing to keep running besides static hosting.
 Interactivity is added through small, targeted client components ("islands")
 rather than making whole pages client-side:
 
-| Route       | Rendering                                                               |
-| ----------- | ----------------------------------------------------------------------- |
-| `/`         | Static, with `Typewriter`, `CurrentlySection`, `InterestsBento` islands |
-| `/resume`   | Static; only the PDF download button is interactive                     |
-| `/travel`   | Static shell; the map and photo lightbox are one client island          |
-| `not-found` | Static 404                                                              |
+| Route         | Rendering                                                               |
+| ------------- | ----------------------------------------------------------------------- |
+| `/`           | Static, with `Typewriter`, `CurrentlySection`, `InterestsBento` islands |
+| `/experience` | Static; only the PDF download button is interactive                     |
+| `/travel`     | Static shell; the map and photo lightbox are one client island          |
+| `not-found`   | Static 404                                                              |
 
 Content lives in `src/lib/` as typed constants instead of a CMS. To update the
 resume, edit `src/lib/data/`. To add a travel location, edit
@@ -102,14 +121,14 @@ src/
   app/
     layout.tsx          # shell: header, nav, footer, cursor dot, theme toggle, analytics
     page.tsx            # home
-    resume/page.tsx
+    experience/page.tsx
     travel/page.tsx
     not-found.tsx
     globals.css         # Tailwind v4 @theme + light/dark semantic tokens
   components/
     home/               # Typewriter, CurrentlySection, InterestsBento
     nav/                # Nav + desktop/mobile variants, active-route NavLink
-    resume/             # experience, skills, education sections
+    experience/             # experience, skills, education sections
     travel/             # TravelMapClient, WorldMap, LocationPanel, Lightbox
     ui/                 # SectionCard, CursorDot, DownloadButton, FocusTrapper,
                         #   ThemeToggle, ThemeProvider

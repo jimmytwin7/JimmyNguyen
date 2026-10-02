@@ -9,8 +9,20 @@
     "start": "next start",
     "refresh:photos": "node scripts/refresh-photos.mjs",
     "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest --run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.{json,css,md}": [
+      "prettier --check"
+    ]
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
@@ -37,8 +49,11 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.5",
     "fast-check": "^4.10.0",
+    "husky": "^9.1.7",
     "jsdom": "^25.0.1",
+    "lint-staged": "^17.6.0",
     "postcss": "^8",
+    "prettier": "^3.9.9",
     "tailwindcss": "^4",
     "typescript": "^5",
     "us-atlas": "^3.0.1",

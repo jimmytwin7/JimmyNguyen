@@ -17,16 +17,12 @@ const fontSans = Figtree({
   subsets: ["latin"],
 });
 
-// Shared across the page title, SEO description, and the Open Graph / Twitter
-// cards so the copy lives in exactly one place.
 const SITE_URL = "https://heyjimmynguyen.com";
 const SITE_TITLE = "Jimmy Nguyen";
 const SITE_DESCRIPTION =
   "Hey I'm Jimmy Nguyen, software engineer. Explore my work, an interactive travel map, and the things I'm into.";
 
 export const metadata: Metadata = {
-  // Base URL for resolving the Open Graph / Twitter image into an absolute URL,
-  // which social platforms require.
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,

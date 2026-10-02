@@ -1,0 +1,15 @@
+# Build output
+.next/
+out/
+build/
+
+# Dependencies
+node_modules/
+
+# Generated / data files
+src/lib/travel/photos.manifest.json
+public/geo/
+*.tsbuildinfo
+
+# Lockfiles
+package-lock.json
