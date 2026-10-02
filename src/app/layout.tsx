@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Figtree } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Nav from "@/components/nav/Nav";
@@ -9,20 +9,50 @@ import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import ThemeProvider from "@/components/ui/ThemeProvider";
 
-const geistSans = Geist({
+// Figtree — a warm, slightly rounded sans for body text. Keeps the
+// `--font-geist-sans` CSS variable name so globals.css and the font-sans
+// utility pick it up without further changes.
+const fontSans = Figtree({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// Shared across the page title, SEO description, and the Open Graph / Twitter
+// cards so the copy lives in exactly one place.
+const SITE_URL = "https://heyjimmynguyen.com";
+const SITE_TITLE = "Jimmy Nguyen";
+const SITE_DESCRIPTION =
+  "Hey I'm Jimmy Nguyen, software engineer. Explore my work, an interactive travel map, and the things I'm into.";
 
 export const metadata: Metadata = {
-  title: "Jimmy Nguyen",
-  description:
-    "Personal portfolio of Jimmy Nguyen — software engineer, traveler, and builder.",
+  // Base URL for resolving the Open Graph / Twitter image into an absolute URL,
+  // which social platforms require.
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_TITLE,
+    type: "website",
+    // Controls the image shown when the link is shared. header-icon.png is
+    // ~square (921x922), so cards that expect a wide image may crop it.
+    images: [
+      {
+        url: "/header-icon.png",
+        width: 921,
+        height: 922,
+        alt: "Jimmy Nguyen logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/header-icon.png"],
+  },
 };
 
 export default function RootLayout({
@@ -31,10 +61,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased min-h-screen flex flex-col`}
-      >
+    <html lang="en" suppressHydrationWarning className={fontSans.variable}>
+      <body className="font-sans antialiased min-h-screen flex flex-col">
         <ThemeProvider>
           <CursorDot />
           <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur-sm">
