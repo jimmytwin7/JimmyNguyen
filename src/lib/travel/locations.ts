@@ -33,6 +33,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Alberta",
     country: "Canada",
     coordinates: [-115.5708, 51.1784],
+    date: "09-04-2026",
     zoom: 7,
     blurb:
       "Turquoise glacial lakes and the Canadian Rockies rising straight out of the treeline.",
@@ -43,6 +44,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Ho Chi Minh City",
     country: "Vietnam",
     coordinates: [106.6297, 10.8231],
+    date: "02-26-2026",
     zoom: 6,
     blurb:
       "A city of controlled chaos, delicious food, and shopping. Time here was limited to two days but I will be back to explore more.",
@@ -53,6 +55,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Hanoi",
     country: "Vietnam",
     coordinates: [105.8342, 21.0278],
+    date: "03-07-2026",
     zoom: 6,
     blurb:
       "Egg coffee, salted cream coffee, and Bun Cha! Much narrower roads compared to Saigon",
@@ -63,6 +66,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Ha Giang",
     country: "Vietnam",
     coordinates: [104.9784, 22.8233],
+    date: "03-03-2026",
     zoom: 6,
     blurb:
       "The best experience in all of southeast asia, a 4 day 3 night motorbike tour through the UNESCO-protected Dong Van Karst Plateau Geopark, steep mountain passes like the dramatic Mã Pì Lèng Pass, deep canyons, terraced rice fields, and traditional ethnic minority villages",
@@ -73,6 +77,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Ninh Binh",
     country: "Vietnam",
     coordinates: [105.975, 20.2506],
+    date: "03-01-2026",
     zoom: 6,
     blurb:
       "Nicknamed Ha Long Bay on land, famous for its dramatic limestone mountains rising out of green rice paddies.",
@@ -83,6 +88,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Washington",
     country: "United States",
     coordinates: [-122.3321, 47.6062],
+    date: "08-25-2024",
     zoom: 6,
     blurb:
       "When I got the one rainy weekend after 8 weeks of sunshine. Didn't get to see Rainer in this weather.",
@@ -93,6 +99,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Illinois",
     country: "United States",
     coordinates: [-87.6298, 41.8781],
+    date: "03-14-2025",
     zoom: 6,
     blurb: "The windy city",
   },
@@ -102,6 +109,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "New York",
     country: "United States",
     coordinates: [-74.006, 40.7128],
+    date: "06-03-2022",
     zoom: 6,
     blurb: "The big apple",
   },
@@ -111,6 +119,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Utah",
     country: "United States",
     coordinates: [-113.0263, 37.2982],
+    date: "10-24-2024",
     zoom: 7,
     blurb:
       "Red sandstone canyon walls, the Narrows, and switchbacks up to Angels Landing.",
@@ -121,6 +130,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Arizona",
     country: "United States",
     coordinates: [-112.1129, 36.1069],
+    date: "10-12-2024",
     zoom: 7,
     blurb: "Absolutely massive, my first national park!",
   },
@@ -130,6 +140,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Utah",
     country: "United States",
     coordinates: [-112.1871, 37.593],
+    date: "10-16-2024",
     zoom: 7,
     blurb: "Hoodoos on hoodoos, beautiful bright orange.",
   },
@@ -139,6 +150,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Michigan",
     country: "United States",
     coordinates: [-86.0586, 44.8619],
+    date: "07-24-2025",
     zoom: 7,
     blurb:
       "One of three National Lakeshores. 60 seconds down, 60 minutes up. A 450 ft dune, rescue cost is $3000",
@@ -149,6 +161,7 @@ export const travelLocations: TravelLocationMeta[] = [
     region: "Michigan",
     country: "United States",
     coordinates: [-84.6189, 45.8492],
+    date: "07-27-2025",
     zoom: 7,
     blurb: "No cars allowed, just bikes, horse-drawn carriages, and fudge.",
   },

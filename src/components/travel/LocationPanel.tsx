@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import type { TravelLocation } from "@/lib/travel/types";
+import { formatTravelDate } from "@/lib/travel/dates";
 import Lightbox from "./Lightbox";
 
 interface LocationPanelProps {
@@ -44,6 +45,9 @@ export default function LocationPanel({
           </h2>
           <p className="text-sm text-muted">
             {location.region} · {location.country}
+          </p>
+          <p className="mt-0.5 text-xs text-faint">
+            {formatTravelDate(location.date)}
           </p>
         </div>
         <button

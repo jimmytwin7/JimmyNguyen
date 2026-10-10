@@ -1,5 +1,5 @@
 import { loadTravelLocations } from "@/lib/travel/loader";
-import TravelMapClient from "@/components/travel/TravelMapClient";
+import TravelViews from "@/components/travel/TravelViews";
 
 export const metadata = {
   title: "Travel — Jimmy Nguyen",
@@ -16,12 +16,12 @@ export default function TravelPage() {
           Travel
         </h1>
         <p className="text-muted text-lg">
-          {locations.length} places so far. Pick a pin on the map, or choose one
-          from the list below it.
+          {locations.length} places so far. Explore them on the map, or scroll
+          the timeline newest-first.
         </p>
       </header>
 
-      <TravelMapClient locations={locations} />
+      <TravelViews locations={locations} />
     </div>
   );
 }

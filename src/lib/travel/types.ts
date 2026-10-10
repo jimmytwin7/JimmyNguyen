@@ -17,6 +17,12 @@ export interface TravelLocationMeta {
   country: string;
   /** [longitude, latitude] — note the order, this is what d3-geo expects */
   coordinates: [number, number];
+  /**
+   * Date visited, as `MM-DD-YYYY` (e.g. "03-07-2026"). Used to order the
+   * timeline view. Parse with `parseTravelDate` in `lib/travel/dates.ts` —
+   * don't string-compare, this format doesn't sort lexically.
+   */
+  date: string;
   /** Map zoom level applied when this location is selected */
   zoom: number;
   /** Short blurb shown in the detail panel */
