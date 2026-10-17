@@ -1,121 +1,167 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import {
+  Hammer,
+  Brain,
+  Map as MapIcon,
+  HeartPulse,
+  Plane,
+  type LucideIcon,
+} from "lucide-react";
 
 interface CurrentlyItem {
-  emoji: string;
+  icon: LucideIcon;
   label: string;
   value: string;
 }
 
 const ITEMS: CurrentlyItem[] = [
-  { emoji: "🛠️", label: "Building", value: "Travel Map" },
-  { emoji: "🧠", label: "Learning", value: "AWS Services" },
-  { emoji: "🗺️", label: "Exploring", value: "Maps & data visualization" },
-  { emoji: "🩼", label: "Recovering from", value: "Broken collarbone" },
-  { emoji: "✈️", label: "Planning", value: "Indonesia and Japan" },
+  { icon: Hammer, label: "Building", value: "Travel Map" },
+  { icon: Brain, label: "Learning", value: "AWS Services" },
+  { icon: MapIcon, label: "Exploring", value: "Maps & data visualization" },
+  { icon: HeartPulse, label: "Recovering from", value: "Broken collarbone" },
+  { icon: Plane, label: "Planning", value: "Indonesia and Japan" },
 ];
 
-const INTERVAL_MS = 3000;
-const SLIDE_MS = 500;
-const ROW_REM = 4; // height of a single row in rem
+const HOLD_MS = 3000; // how long each item sits centered
+const SLIDE_MS = 550; // slide duration between items
+const N = ITEMS.length;
 
+/**
+ * "Currently" carousel. Shows three items at a time on sm+ — the center one
+ * sharp, the left/right neighbors blurred and dimmed as a peek — advancing one
+ * step every few seconds. Below sm it falls back to a single centered item
+ * (three thirds is too cramped to read on a phone).
+ *
+ * Infinite loop: the list is padded with a clone of the last item at the front
+ * and the first item at the end, so the active item always has real neighbors.
+ * `active` runs 0..N over the real items; when it steps onto the trailing clone
+ * we let the slide finish, then silently snap back to 0.
+ */
 export default function CurrentlySection() {
-  // index runs 0..ITEMS.length (one past the end lands on the duplicated first item)
-  const [index, setIndex] = useState(0);
+  const [active, setActive] = useState(0);
   const [animate, setAnimate] = useState(true);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setIndex((i) => i + 1);
-    }, INTERVAL_MS);
+    const id = setInterval(() => setActive((a) => a + 1), HOLD_MS);
     return () => clearInterval(id);
   }, []);
 
-  // When we slide onto the duplicated first item (index === length), let the
-  // animation finish, then snap back to the real first item with no transition.
+  // Stepped onto the trailing clones (active === N): finish the slide, then
+  // reset to 0 with the transition off so the jump is invisible.
   useEffect(() => {
-    if (index !== ITEMS.length) return;
-    const timer = setTimeout(() => {
+    if (active !== N) return;
+    const t = setTimeout(() => {
       setAnimate(false);
-      setIndex(0);
+      setActive(0);
     }, SLIDE_MS);
-    return () => clearTimeout(timer);
-  }, [index]);
+    return () => clearTimeout(t);
+  }, [active]);
 
-  // Re-enable the transition on the next frame after a silent reset.
   useEffect(() => {
     if (animate) return;
     const raf = requestAnimationFrame(() => setAnimate(true));
     return () => cancelAnimationFrame(raf);
   }, [animate]);
 
-  // Duplicate so there's always a previous/next item to show and slide into.
-  const loopItems = [...ITEMS, ...ITEMS, ...ITEMS];
+  // Pad with the last TWO items at the front and the first TWO at the back.
+  // Two clones each side (not one) means the centered item in the 3-up view
+  // always has a real neighbor on BOTH sides — including when we slide onto a
+  // trailing clone during the loop reset, which is what caused the stutter with
+  // single-clone padding. Real item k sits at padded index k + 2.
+  const padded = [ITEMS[N - 2], ITEMS[N - 1], ...ITEMS, ITEMS[0], ITEMS[1]];
+
+  // Track shift (in item-widths) before the responsive clone offset (--lead)
+  // is added in CSS. See the transform below and globals.css for the geometry.
+  const step = active;
 
   return (
     <section
       aria-labelledby="currently-heading"
-      className="rounded-2xl shadow-lg border border-edge bg-surface p-6 sm:p-8"
+      className="rounded-2xl border border-edge bg-surface p-5 shadow-lg sm:p-8"
     >
-      <h2
-        id="currently-heading"
-        className="text-sm font-semibold uppercase tracking-wide text-muted mb-4"
-      >
-        Currently
-      </h2>
-
-      {/* Viewport: 3 rows tall, active item centered */}
-      <div
-        className="relative overflow-hidden"
-        style={{
-          height: `${ROW_REM * 3}rem`,
-          // Soft fade at top and bottom edges
-          maskImage:
-            "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, transparent, black 20%, black 80%, transparent)",
-        }}
-        aria-live="polite"
-      >
-        <ul
-          className="absolute inset-x-0 top-0 ease-in-out"
-          style={{
-            // Offset so the active item (index) sits in the middle slot.
-            // +ITEMS.length keeps us in the middle copy for headroom above.
-            transform: `translateY(-${(index + ITEMS.length - 1) * ROW_REM}rem)`,
-            transition: animate ? `transform ${SLIDE_MS}ms` : "none",
-          }}
+      <div className="mb-4 flex items-center gap-2">
+        {/* Pulsing live dot — the "this is current" cue. */}
+        <span className="relative flex h-2 w-2" aria-hidden="true">
+          <span
+            className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 motion-reduce:hidden"
+            style={{ backgroundColor: "var(--accent)" }}
+          />
+          <span
+            className="relative inline-flex h-2 w-2 rounded-full"
+            style={{ backgroundColor: "var(--accent)" }}
+          />
+        </span>
+        <h2
+          id="currently-heading"
+          className="text-xs font-semibold uppercase tracking-wide text-muted sm:text-sm"
         >
-          {loopItems.map((item, i) => {
-            // Which position is currently the active (center) row?
-            const activeRow = index + ITEMS.length;
-            const isActive = i === activeRow;
+          Currently
+        </h2>
+      </div>
+
+      {/* Viewport. On mobile each item is full width (1-up); on sm+ each item is
+          a third, so the active item is flanked by blurred neighbors.
+
+          `--slot` is one item width as a % of the track, swapped at the
+          breakpoint (100 on mobile, 33.333 on sm+), so the transform shifts by
+          whole items in either layout. */}
+      <div className="currently-carousel relative h-14 overflow-hidden sm:h-16">
+        <div
+          className="flex h-full"
+          style={
+            {
+              // --slot = one item width (% of track); --lead = clone offset in
+              // slots (two front clones now). Both swap at the sm breakpoint
+              // (see globals.css):
+              //   mobile 1-up: slot 100%, lead 2 → active item at the left edge
+              //   sm+ 3-up:    slot 33.3%, lead 1 → active item in the centre
+              //                slot, flanked by real neighbors on both sides
+              transform: `translateX(calc((${step} + var(--lead)) * var(--slot) * -1%))`,
+              transition: animate
+                ? `transform ${SLIDE_MS}ms ease-in-out`
+                : "none",
+            } as React.CSSProperties
+          }
+        >
+          {padded.map((item, i) => {
+            const Icon = item.icon;
+            // Two front clones, so real item k is at padded index k + 2.
+            const isActive = i === active + 2;
             return (
-              <li
+              <div
                 key={`${item.label}-${i}`}
-                className="flex items-center gap-4 transition-opacity duration-500"
+                // Full width on mobile, a third on sm+ (the 3-up view).
+                className="flex h-full w-full shrink-0 items-center justify-center gap-3 px-2 transition-all duration-500 sm:w-1/3 sm:gap-4"
                 style={{
-                  height: `${ROW_REM}rem`,
-                  opacity: isActive ? 1 : 0.35,
+                  opacity: isActive ? 1 : 0.2,
                 }}
                 aria-hidden={isActive ? undefined : true}
               >
-                <span className="text-3xl shrink-0" aria-hidden="true">
-                  {item.emoji}
+                <span
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12"
+                  style={{
+                    backgroundColor:
+                      "color-mix(in srgb, var(--accent) 12%, transparent)",
+                    color: "var(--accent)",
+                  }}
+                  aria-hidden="true"
+                >
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2} />
                 </span>
-                <div className="min-w-0">
-                  <p className="text-xs font-medium uppercase tracking-wide text-faint">
+                <span className="flex min-w-0 flex-col">
+                  <span className="text-xs font-medium uppercase tracking-wide text-faint">
                     {item.label}
-                  </p>
-                  <p className="text-lg font-semibold text-app truncate">
+                  </span>
+                  <span className="truncate text-base font-semibold text-app sm:text-lg">
                     {item.value}
-                  </p>
-                </div>
-              </li>
+                  </span>
+                </span>
+              </div>
             );
           })}
-        </ul>
+        </div>
       </div>
     </section>
   );

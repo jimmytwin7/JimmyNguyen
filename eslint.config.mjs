@@ -1,5 +1,6 @@
 import coreWebVitals from "eslint-config-next/core-web-vitals";
 import typescript from "eslint-config-next/typescript";
+import jsxA11y from "eslint-plugin-jsx-a11y";
 
 /**
  * ESLint flat config.
@@ -20,7 +21,17 @@ const eslintConfig = [
     ],
   },
   {
+    /**
+     * Accessibility: eslint-config-next already registers the jsx-a11y plugin
+     * but only turns on a handful of rules as warnings. We opt into the
+     * plugin's full `recommended` rule set here (the plugin is already
+     * registered by Next, so we reference its rules rather than re-adding the
+     * plugin, which flat config forbids) and promote the lot to errors so a
+     * real a11y problem fails the build and the pre-commit hook.
+     */
     rules: {
+      ...jsxA11y.configs.recommended.rules,
+
       /**
        * Several components intentionally flip a boolean in a mount effect
        * (`setMounted(true)`, `setPortalReady(true)`) so that the server render

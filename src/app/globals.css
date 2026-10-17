@@ -78,3 +78,24 @@ body {
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/*
+ * "Currently" carousel geometry. The component shifts its track by
+ * (step + --lead) * --slot percent. These vars swap at the sm breakpoint so
+ * the same transform works for both layouts:
+ *   mobile  — 1-up: one item fills the row (--slot 100), leading clone offset
+ *             of one slot (--lead 1) keeps the active item in view.
+ *   sm+     — 3-up: each item is a third (--slot 33.333), no extra lead
+ *             (--lead 0) so the active item sits centered between neighbors.
+ */
+.currently-carousel {
+  --slot: 100;
+  --lead: 2;
+}
+
+@media (min-width: 640px) {
+  .currently-carousel {
+    --slot: 33.3333;
+    --lead: 1;
+  }
+}

@@ -4,7 +4,7 @@ Personal portfolio site — an experience page and an interactive travel map, bu
 a fully static Next.js app with no database, CMS, or API routes.
 
 **Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 ·
-next-themes (light/dark) · react-simple-maps · Framer Motion
+next-themes (light/dark) · react-simple-maps · Framer Motion · lucide-react
 
 ## Getting started
 
@@ -22,7 +22,7 @@ credentials are only required if you want to re-sync travel photos — see
 | `npm run dev`            | Dev server with hot reload                        |
 | `npm run build`          | Production build                                  |
 | `npm start`              | Serve the production build                        |
-| `npm run lint`           | ESLint (flat config, `eslint-config-next`)        |
+| `npm run lint`           | ESLint — `eslint-config-next` + full `jsx-a11y`   |
 | `npm run format`         | Format the whole project with Prettier            |
 | `npm run format:check`   | Check formatting without writing (CI / hook)      |
 | `npm run refresh:photos` | Re-sync the travel photo manifest from Cloudinary |
@@ -57,7 +57,8 @@ rather than making whole pages client-side:
 | ------------- | ----------------------------------------------------------------------- |
 | `/`           | Static, with `Typewriter`, `CurrentlySection`, `InterestsBento` islands |
 | `/experience` | Static; only the PDF download button is interactive                     |
-| `/travel`     | Static shell; the map and photo lightbox are one client island          |
+| `/travel`     | Static shell; the map + timeline views and lightbox are a client island |
+| `/cooking`    | Static placeholder for an upcoming project                              |
 | `not-found`   | Static 404                                                              |
 
 Content lives in `src/lib/` as typed constants instead of a CMS. To update the
@@ -123,19 +124,22 @@ src/
     page.tsx            # home
     experience/page.tsx
     travel/page.tsx
+    cooking/page.tsx    # placeholder for an upcoming project
     not-found.tsx
     globals.css         # Tailwind v4 @theme + light/dark semantic tokens
   components/
-    home/               # Typewriter, CurrentlySection, InterestsBento
+    home/               # Typewriter, CurrentlySection (lucide icon carousel), InterestsBento
     nav/                # Nav + desktop/mobile variants, active-route NavLink
-    experience/             # experience, skills, education sections
-    travel/             # TravelMapClient, WorldMap, LocationPanel, Lightbox
+    resume/             # experience, skills, education sections (used by /experience)
+    travel/             # TravelViews (map/timeline toggle), TravelMapClient,
+                        #   WorldMap, LocationPanel, Lightbox, TravelTimeline
     ui/                 # SectionCard, CursorDot, DownloadButton, FocusTrapper,
                         #   ThemeToggle, ThemeProvider
     Footer.tsx
   lib/
     data/               # resume content (experience, skills, education)
-    travel/             # locations, types, loader, photos.manifest.json
+    travel/             # locations, types, loader, dates, photos.manifest.json
+    hooks/              # useInView (scroll-reveal via IntersectionObserver)
     utils/              # sort helpers
 public/
   geo/                  # TopoJSON basemap layers (countries, US states, cities)
@@ -150,9 +154,19 @@ scripts/
 
 ## Travel map
 
-`/travel` renders an interactive SVG world map. Clicking a pin zooms to that
-location and shows its blurb and photo grid below; clicking a photo opens a
-full-screen lightbox.
+`/travel` offers two views of the same data, switched by a toggle (`TravelViews`):
+
+- **Map** — an interactive SVG world map. Clicking a pin zooms to that location
+  and shows its blurb and photo grid below; clicking a photo opens a full-screen
+  lightbox.
+- **Timeline** — the same locations as a newest-first vertical timeline
+  (`TravelTimeline`), each entry with its date, blurb, and a horizontal photo
+  filmstrip. Entries reveal on scroll via the `useInView` hook (a no-op under
+  `prefers-reduced-motion`); the photos still open the shared lightbox.
+
+Dates live on each location (`MM-DD-YYYY`) and are parsed/formatted/sorted by
+`lib/travel/dates.ts` — string-comparing that format would mis-sort, so the
+timeline parses to real `Date`s.
 
 ### How it fits together
 
@@ -285,9 +299,11 @@ whole set, so opening a large gallery doesn't pull down every full-size image.
 
 - **Nav** — `NavLink` marks the active route with `aria-current="page"`. The
   mobile menu traps focus via `FocusTrapper` and restores it on close.
-- **`CurrentlySection`** — a vertically scrolling "currently" list that loops
-  seamlessly by rendering three copies of the list and snapping back without a
-  transition once it slides onto the duplicate.
+- **`CurrentlySection`** — a horizontal "currently" carousel with lucide-react
+  icons and a pulsing live dot. Three items show at a time on desktop (center
+  sharp, neighbors dimmed), falling back to a single centered item on mobile;
+  it advances on a timer and loops seamlessly via clone-padding and a silent
+  reset.
 - **`Typewriter`** — types out the hero heading, then the paragraph after a
   delay, so the two don't animate over each other.
 - **`CursorDot`** — a custom trailing cursor, deliberately disabled on `/travel`
@@ -316,6 +332,14 @@ the resulting detail panel rather than changing silently.
 
 Elsewhere: interactive regions use `aria-labelledby` where relevant, and the
 mobile nav traps and restores focus explicitly.
+
+Accessibility is also enforced in CI/commits: the ESLint config turns on the
+full `eslint-plugin-jsx-a11y` **recommended** rule set as errors (not just the
+small subset `eslint-config-next` enables by default), so a11y regressions fail
+`npm run lint` and the pre-commit hook. The two deliberate exceptions — the
+lightbox's click-outside-to-close backdrop and its click-swallowing image box —
+are suppressed inline with explanations, since keyboard users already close with
+Escape and navigate with arrows.
 
 ## Deployment
 

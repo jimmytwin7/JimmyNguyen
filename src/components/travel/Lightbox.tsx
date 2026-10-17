@@ -241,6 +241,10 @@ export default function Lightbox({
   );
 
   return createPortal(
+    // Click-outside-to-close is a pointer convenience only. Keyboard users
+    // close with Escape (handled by the document keydown listener above), so
+    // this backdrop click needs no keyboard equivalent.
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <div
       role="dialog"
       aria-modal="true"
@@ -300,7 +304,12 @@ export default function Lightbox({
 
       {/* Image box sized to the photo's aspect ratio so its edges match the
           visible photo, and the caption bar can sit flush on the image bottom.
-          Centered in the viewport. */}
+          Centered in the viewport.
+
+          The only purpose of its onClick is to stop a click on the photo from
+          bubbling to the backdrop (which would close the viewer). It's not an
+          interactive control, so it has no keyboard behaviour to mirror. */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className="relative"
         style={{
