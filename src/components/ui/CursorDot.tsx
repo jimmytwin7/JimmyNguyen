@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 /** Routes where the cursor dot is hidden (e.g. the interactive map). */
-const DISABLED_ROUTES = ["/travel"];
+// /cooking has its own visual world; the site's brand-blue dot clashes with it.
+const DISABLED_ROUTES = ["/travel", "/cooking"];
 
 export default function CursorDot() {
   const pathname = usePathname();

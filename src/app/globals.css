@@ -99,3 +99,369 @@ body {
     --lead: 1;
   }
 }
+
+/* ==========================================================================
+ * Pantry Quest (/cooking) — a self-contained "cooking game" world.
+ *
+ * Everything is scoped under .pq-stage. The stage re-defines the site's
+ * semantic tokens (--surface, --text, --border, --accent, …) for its subtree,
+ * so every cooking component re-skins without touching other routes.
+ * ======================================================================== */
+.pq-stage {
+  /* Cozy farmhouse kitchen (Stardew-ish): warm browns, soft outlines. */
+  --pq-ink: #5b3a29; /* outlines + headings — warm walnut, not black */
+  --pq-ledge: rgb(91 58 41 / 0.35); /* soft drop "ledge" under cards */
+  --pq-wall: #fbf3e4;
+  --pq-wood: #e3b47c;
+  --pq-wood-grain: rgb(176 120 64 / 0.28);
+  --pq-wood-edge: #b9824a;
+  --pq-paper: #fffcf5;
+  /* Site brand blue (brand-700): white text clears 4.5:1 (~5.9:1). */
+  --pq-primary: var(--color-brand-700);
+  --pq-sky: #7dd3fc; /* sky-300: ribbons, Add button, logo shadow */
+  --pq-green: #6aa84f;
+
+  --surface: var(--pq-paper);
+  --surface-muted: #fbf3e4;
+  --surface-raised: #f6e7cc;
+  --text: #3f2a1e;
+  --text-muted: #6b4c3b;
+  --text-faint: #7a5c4b;
+  --border: rgb(91 58 41 / 0.25);
+  --line: rgb(91 58 41 / 0.3);
+  --accent: var(--pq-primary);
+  /* Tailwind's --color-* tokens resolve var(--text) etc. once on <html>, so
+     re-declare them here to make utilities (text-app, bg-surface, …) pick up
+     the stage values above instead of the site theme's. */
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-raised: var(--surface-raised);
+  --color-app: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-edge: var(--border);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+
+  /* Always the light kitchen, even when the rest of the site is dark;
+     color-scheme keeps native controls (select, checkbox) light too. */
+  color-scheme: light;
+  color: var(--text);
+  /* Full-bleed under the nav: break out of the layout's max-width + padding. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  margin-block: -2.5rem; /* cancels <main> py-10 */
+  min-height: calc(100dvh - 4rem); /* viewport minus the 4rem header */
+  /* Plain warm wall with a soft "window light" glow — no pattern. */
+  background:
+    radial-gradient(
+      ellipse 80% 45% at 50% 0%,
+      rgb(255 255 255 / 0.7),
+      transparent 70%
+    ),
+    linear-gradient(180deg, #fdf7ec 0%, var(--pq-wall) 55%, #f4e6cd 100%);
+}
+
+/* Body text stays the site's Figtree (ties the page to the rest of the
+   site); the rounded game face is only for headings and buttons. */
+.pq-stage :is(h1, h2, h3, legend, .pq-btn, .pq-knife-btn, .pq-ribbon) {
+  font-family: var(--font-pq-display), var(--font-sans), sans-serif;
+}
+
+/* The 100vw breakout includes the scrollbar; clip only on this page. */
+body:has(.pq-stage) {
+  overflow-x: clip;
+}
+
+/* Soft outlined card with a short drop "ledge". */
+.pq-panel {
+  background: var(--surface);
+  border: 2px solid var(--pq-ink);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 0 var(--pq-ledge);
+}
+
+/* Game-style button that presses down. */
+.pq-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 2px solid var(--pq-ink);
+  border-radius: 9999px;
+  box-shadow: 0 3px 0 var(--pq-ink);
+  font-weight: 700;
+  transition:
+    transform 80ms ease,
+    box-shadow 80ms ease;
+}
+.pq-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--pq-ink);
+}
+.pq-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--pq-ink);
+}
+.pq-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.pq-btn-primary {
+  background: var(--pq-primary);
+  color: #ffffff;
+}
+.pq-btn-secondary {
+  background: var(--pq-sky);
+  color: #3f2a1e;
+}
+.pq-btn-plain {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Big wooden cutting board: soft grain, rounded corners, edge, handle hole. */
+.pq-board {
+  position: relative;
+  background-color: var(--pq-wood);
+  /* Checkerboard: two offset gradients tint alternating squares, over a soft
+     "window light" glow. --pq-check sizes one square. */
+  --pq-check: 48px;
+  background-image:
+    radial-gradient(
+      ellipse at 30% 20%,
+      rgb(255 255 255 / 0.22),
+      transparent 60%
+    ),
+    repeating-conic-gradient(var(--pq-wood-grain) 0% 25%, transparent 0% 50%);
+  background-size:
+    auto,
+    calc(var(--pq-check) * 2) calc(var(--pq-check) * 2);
+  border: 3px solid var(--pq-ink);
+  border-radius: 2.25rem;
+  box-shadow:
+    0 8px 0 var(--pq-wood-edge),
+    0 8px 0 3px var(--pq-ink),
+    0 20px 30px -12px rgb(91 58 41 / 0.35);
+}
+
+/* Logo: warm walnut letters with a sky-blue drop shadow. */
+.pq-logo {
+  color: var(--pq-ink);
+  text-shadow: 0 4px 0 var(--pq-sky);
+  letter-spacing: -0.01em;
+}
+
+/* Section label tag. */
+.pq-ribbon {
+  display: inline-block;
+  background: var(--pq-sky);
+  color: #3f2a1e;
+  border: 2px solid var(--pq-ink);
+  border-radius: 0.75rem;
+  box-shadow: 0 3px 0 var(--pq-ledge);
+  padding: 0.15rem 0.9rem;
+}
+
+/* Paper ticket pinned to the board. */
+.pq-ticket {
+  background: var(--pq-paper);
+  border: 2px solid var(--pq-ink);
+  border-radius: 1.1rem;
+  box-shadow: 0 4px 0 var(--pq-ledge);
+}
+.pq-tape {
+  position: absolute;
+  top: -0.75rem;
+  left: 50%;
+  width: 5rem;
+  height: 1.4rem;
+  translate: -50% 0;
+  rotate: -3deg;
+  background: rgb(248 210 106 / 0.85);
+  border: 1.5px solid rgb(91 58 41 / 0.5);
+  border-radius: 0.25rem;
+}
+
+/* Striped "progress" bar for the match meter. */
+.pq-meter {
+  height: 0.75rem;
+  border: 2px solid var(--pq-ink);
+  border-radius: 9999px;
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+.pq-meter > span {
+  display: block;
+  height: 100%;
+  background-color: var(--pq-green);
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgb(255 255 255 / 0.25) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+/* Highlight while a shelf item is dragged over the board. */
+.pq-board-drop {
+  outline: 4px dashed var(--pq-primary);
+  outline-offset: 6px;
+}
+
+/* Pantry shelf: darker wood back panel; each row of slots sits on a plank. */
+.pq-shelf {
+  background-color: #d6a26a;
+  background-image: radial-gradient(
+    ellipse at 30% 10%,
+    rgb(255 255 255 / 0.2),
+    transparent 60%
+  );
+  border: 3px solid var(--pq-ink);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 6px 0 var(--pq-wood-edge),
+    0 6px 0 3px var(--pq-ink);
+}
+.pq-shelf-slot {
+  /* Slots are flush (no column gap), so row bottoms join into one plank. */
+  border-bottom: 6px solid var(--pq-wood-edge);
+  box-shadow: 0 3px 0 rgb(91 58 41 / 0.45);
+  margin-bottom: 0.75rem;
+  padding-inline: 0.125rem;
+}
+
+/* Order rail: a steel bar the recipe tickets hang from. */
+.pq-rail {
+  position: absolute;
+  inset-inline: 0;
+  top: 0.25rem;
+  height: 0.75rem;
+  background: linear-gradient(180deg, #e2e8f0, #94a3b8);
+  border: 2px solid var(--pq-ink);
+  border-radius: 9999px;
+  box-shadow: 0 3px 0 var(--pq-ledge);
+}
+.pq-rail-track {
+  position: relative; /* tickets + clips paint above the bar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--pq-wood-edge) transparent;
+}
+
+/* Stove pot (pixel sprite): steam puffs + a gentle bob while cooking. */
+.pq-pot .pq-steam {
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  translate: -50% 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.pq-pot .pq-steam span {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #ffffff;
+}
+.pq-pot .pq-steam span:nth-child(1) {
+  left: -12px;
+}
+.pq-pot .pq-steam span:nth-child(3) {
+  left: 4px;
+}
+.pq-pot-cooking .pq-steam {
+  opacity: 0.85;
+}
+.pq-pot-cooking .pq-steam span {
+  animation: pq-steam 1.6s ease-out infinite;
+}
+.pq-pot-cooking .pq-steam span:nth-child(2) {
+  animation-delay: 0.5s;
+}
+.pq-pot-cooking .pq-steam span:nth-child(3) {
+  animation-delay: 1s;
+}
+/* The pot bobs while cooking, and gives a little hop as ingredients land. */
+.pq-pot-img {
+  transition: transform 0.2s ease;
+}
+.pq-pot-cooking .pq-pot-img {
+  animation: pq-pot-bob 0.6s ease-in-out infinite;
+}
+.pq-pot-filling .pq-pot-img {
+  animation: pq-pot-hop 0.4s ease-in-out infinite;
+}
+
+/* "Find my recipe" pixel knife: lifts on hover, chops when pressed. */
+.pq-knife-btn {
+  cursor: pointer;
+  transform-origin: 85% 60%; /* pivots near the handle (right), like a chop */
+  transition: transform 120ms ease;
+}
+.pq-knife-btn:hover:not(:disabled) {
+  transform: translateY(-2px) rotate(3deg);
+}
+.pq-knife-btn:active:not(:disabled) {
+  transform: translateY(2px) rotate(-5deg);
+  transition-duration: 60ms;
+}
+.pq-knife-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pq-knife-btn:focus-visible {
+  outline: 3px solid var(--pq-primary);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+@keyframes pq-steam {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.6);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1.1);
+  }
+}
+@keyframes pq-pot-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes pq-pot-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-4px) scale(1.04, 0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pq-btn {
+    transition: none;
+  }
+  /* Keep the "cooking" steam visible, just without movement. */
+  .pq-pot-cooking .pq-steam span,
+  .pq-pot-cooking .pq-pot-img,
+  .pq-pot-filling .pq-pot-img {
+    animation: none;
+  }
+  .pq-knife-btn {
+    transition: none;
+  }
+  .pq-knife-btn:hover:not(:disabled),
+  .pq-knife-btn:active:not(:disabled) {
+    transform: none;
+  }
+}

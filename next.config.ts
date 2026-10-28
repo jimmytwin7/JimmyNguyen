@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
         pathname: "/mxlapddp/**",
       },
+      // Pantry Quest recipe photos, scoped to TheMealDB's meal image path.
+      {
+        protocol: "https",
+        hostname: "www.themealdb.com",
+        pathname: "/images/media/meals/**",
+      },
     ],
   },
 };

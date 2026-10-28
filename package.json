@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "refresh:photos": "node scripts/refresh-photos.mjs",
+    "upload:ingredients": "node scripts/upload-ingredients.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

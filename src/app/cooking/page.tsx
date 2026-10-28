@@ -1,19 +1,32 @@
+import { M_PLUS_Rounded_1c } from "next/font/google";
+import PantryQuest from "@/components/cooking/PantryQuest";
+import PantryQuestHeader from "@/components/cooking/PantryQuestHeader";
+import { PROJECT_NAME } from "@/lib/cooking/config";
+
+// Rounded Japanese-style face for headings and buttons (body text stays the
+// site's Figtree). Loaded only on this route, so other pages don't pay for it.
+const rounded = M_PLUS_Rounded_1c({
+  weight: ["700", "800"],
+  variable: "--font-pq-display",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata = {
-  title: "Cooking — Jimmy Nguyen",
-  description: "Upcoming cooking project.",
+  title: `${PROJECT_NAME} — Jimmy Nguyen`,
+  description:
+    "Add the ingredients you have and find real recipes with a transparent ingredient-match score.",
 };
 
 export default function CookingPage() {
   return (
-    <div className="space-y-8">
-      <header className="text-center">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-app mb-2">
-          Upcoming Cooking Project
-        </h1>
-        <p className="text-muted text-lg">
-          Expiring pantry items? What can you do with them...
-        </p>
-      </header>
+    // .pq-stage (globals.css) breaks out to full width under the nav and
+    // re-skins the theme tokens for everything inside.
+    <div className={`pq-stage ${rounded.variable}`}>
+      <div className="mx-auto max-w-6xl space-y-12 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <PantryQuestHeader />
+        <PantryQuest />
+      </div>
     </div>
   );
 }

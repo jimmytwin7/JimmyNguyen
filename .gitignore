@@ -15,6 +15,12 @@
 .DS_Store
 *.pem
 
+# Licensed ingredient icons (Pixeltier pack) — served from Cloudinary, never
+# committed. The two original fallback boxes are kept (negated below).
+/public/images/ingredients/*.png
+!/public/images/ingredients/no-art.svg
+!/public/images/ingredients/unknown.svg
+
 # debug
 npm-debug.log*
 yarn-debug.log*

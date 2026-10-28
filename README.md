@@ -1,7 +1,9 @@
 # JimmyNguyen
 
-Personal portfolio site — an experience page and an interactive travel map, built as
-a fully static Next.js app with no database, CMS, or API routes.
+Personal portfolio site — an experience page, an interactive travel map, and
+**Pantry Quest**, a recipe finder that matches what's in your kitchen against
+real recipes. Built with Next.js; no database or CMS. Every page is static
+except Pantry Quest's two small server routes.
 
 **Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 ·
 next-themes (light/dark) · react-simple-maps · Framer Motion · lucide-react
@@ -13,9 +15,10 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
-No environment variables are needed to run, build, or deploy the site. Cloudinary
-credentials are only required if you want to re-sync travel photos — see
-[Photos](#photos-cloudinary--committed-manifest).
+No environment variables are needed to run, build, or deploy the site. All of
+them are optional (see `.env.example`): Cloudinary credentials only matter for
+re-syncing travel photos ([Photos](#photos-cloudinary--committed-manifest)), and
+`RECIPE_API_KEY` is an optional TheMealDB supporter key for Pantry Quest.
 
 | Script                   | What it does                                      |
 | ------------------------ | ------------------------------------------------- |
@@ -25,6 +28,7 @@ credentials are only required if you want to re-sync travel photos — see
 | `npm run lint`           | ESLint — `eslint-config-next` + full `jsx-a11y`   |
 | `npm run format`         | Format the whole project with Prettier            |
 | `npm run format:check`   | Check formatting without writing (CI / hook)      |
+| `npm test`               | Vitest — unit, API route, and UI tests (one run)  |
 | `npm run refresh:photos` | Re-sync the travel photo manifest from Cloudinary |
 
 ## Code quality
@@ -46,9 +50,11 @@ Run `npm run format` to auto-fix formatting before committing.
 
 ## Architecture
 
-The whole site renders at build time. Every page is a React Server Component
-that imports typed TypeScript constants directly — there's no data fetching at
-request time, no API layer, and nothing to keep running besides static hosting.
+Pages render at build time. Every page is a React Server Component that imports
+typed TypeScript constants directly — no request-time data fetching for page
+content. The only server code is Pantry Quest's two route handlers
+(`/api/recipes`, `/api/substitutions`), which run as serverless functions on
+Vercel; see [docs/pantry-quest.md](docs/pantry-quest.md).
 
 Interactivity is added through small, targeted client components ("islands")
 rather than making whole pages client-side:
@@ -58,7 +64,7 @@ rather than making whole pages client-side:
 | `/`           | Static, with `Typewriter`, `CurrentlySection`, `InterestsBento` islands |
 | `/experience` | Static; only the PDF download button is interactive                     |
 | `/travel`     | Static shell; the map + timeline views and lightbox are a client island |
-| `/cooking`    | Static placeholder for an upcoming project                              |
+| `/cooking`    | Static shell; Pantry Quest is one client island calling `/api/*`        |
 | `not-found`   | Static 404                                                              |
 
 Content lives in `src/lib/` as typed constants instead of a CMS. To update the
@@ -124,7 +130,9 @@ src/
     page.tsx            # home
     experience/page.tsx
     travel/page.tsx
-    cooking/page.tsx    # placeholder for an upcoming project
+    cooking/page.tsx    # Pantry Quest recipe finder
+    api/recipes/        # GET  — search TheMealDB, score against the pantry
+    api/substitutions/  # POST — dictionary-based substitution ideas
     not-found.tsx
     globals.css         # Tailwind v4 @theme + light/dark semantic tokens
   components/
@@ -133,10 +141,13 @@ src/
     resume/             # experience, skills, education sections (used by /experience)
     travel/             # TravelViews (map/timeline toggle), TravelMapClient,
                         #   WorldMap, LocationPanel, Lightbox, TravelTimeline
+    cooking/            # Pantry Quest: input, cutting board, results, detail,
+                        #   substitutions, cooking mode
     ui/                 # SectionCard, CursorDot, DownloadButton, FocusTrapper,
                         #   ThemeToggle, ThemeProvider
     Footer.tsx
   lib/
+    cooking/            # pure matching/normalizing/filter logic + server/ adapters
     data/               # resume content (experience, skills, education)
     travel/             # locations, types, loader, dates, photos.manifest.json
     hooks/              # useInView (scroll-reveal via IntersectionObserver)
@@ -295,6 +306,22 @@ whole set, so opening a large gallery doesn't pull down every full-size image.
 
 ---
 
+## Pantry Quest (`/cooking`)
+
+Add the ingredients you have to a virtual cutting board; Pantry Quest finds real
+recipes from [TheMealDB](https://www.themealdb.com/), scores each with a
+deterministic **ingredient-match percentage**, lists exactly what you have and
+what's missing, suggests substitutions from a built-in dictionary, and walks you
+through instructions in a one-step-at-a-time Cooking Mode.
+
+Highlights: provider isolated behind an interface; scoring, normalization, and
+dietary filtering are pure, tested functions; API keys stay server-side; the
+whole flow works with no keys at all. Full write-up — architecture, scoring
+formula, substitution safety rules, env vars, and limitations — in
+**[docs/pantry-quest.md](docs/pantry-quest.md)**.
+
+---
+
 ## Other details
 
 - **Nav** — `NavLink` marks the active route with `aria-current="page"`. The
@@ -345,7 +372,9 @@ Escape and navigate with arrows.
 
 Deployed on Vercel. Because the photo manifest and basemap TopoJSON are both
 committed, a deploy is just `npm install && npm run build` with **no environment
-variables configured**.
+variables configured**. Pantry Quest's optional `RECIPE_API_KEY` can be set in
+Vercel's project environment variables if you want it (see
+[docs/pantry-quest.md](docs/pantry-quest.md#deployment)).
 
 ## Data attribution
 
@@ -353,6 +382,13 @@ variables configured**.
   and [us-atlas](https://github.com/topojson/us-atlas), derived from
   [Natural Earth](https://www.naturalearthdata.com/) (public domain).
 - City points (population > 1M): derived from Natural Earth populated places.
+- Pantry Quest recipes and recipe photos: [TheMealDB](https://www.themealdb.com/).
+  Each recipe links back to its TheMealDB page (and the original source when
+  supplied).
+- Pantry Quest ingredient illustrations: pixel-art icons from Pixeltier's
+  Food & Cooking RPG Icons, used under the pack's license (no redistribution as
+  a standalone pack). Full source and license notes are in
+  `public/images/ingredients/CREDITS.md`.
 
 Both atlas packages are devDependencies — they're only used to source the JSON
 into `public/geo/`, never imported at runtime.
