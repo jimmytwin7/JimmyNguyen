@@ -9,11 +9,13 @@ import {
  * POST /api/substitutions
  * Body: { recipeTitle, missing: string[], available?: string[], diet?: string[] }
  *
- * 200 SubstitutionResponse (AI or fallback — always succeeds once validated) |
- * 400 invalid body | 413 too large | 429 rate limited.
+ * 200 SubstitutionResponse (dictionary lookup — always succeeds once validated)
+ * | 400 invalid body | 413 too large | 429 rate limited.
  */
 
-// Tighter than search: each call can hit a paid AI provider.
+// Tighter than search: this endpoint accepts a request body, so keep the
+// per-IP ceiling low as a guard against abuse. (In-memory, per-instance — a
+// runaway-loop guard, not a strict global limit; see rate-limit.ts.)
 const limiter = createRateLimiter({ limit: 10, windowMs: 60_000 });
 
 const json = (body: unknown, status = 200) =>
@@ -32,7 +34,9 @@ export async function POST(request: Request) {
   let body: unknown;
   try {
     const text = await request.text();
-    if (text.length > MAX_SUBSTITUTION_BODY_BYTES) {
+    // Measure actual UTF-8 bytes, not UTF-16 code units, so multibyte input
+    // can't slip past the limit unnoticed.
+    if (new TextEncoder().encode(text).length > MAX_SUBSTITUTION_BODY_BYTES) {
       return json({ error: "Request is too large." }, 413);
     }
     body = JSON.parse(text);
