@@ -1,7 +1,7 @@
 import type { DietaryFilter } from "./types";
 
 /** Display name — kept in one place so it's easy to rename. */
-export const PROJECT_NAME = "Pantry Quest";
+export const PROJECT_NAME = "Scrambl";
 
 /** Input limits, enforced in the UI and again on the server. */
 export const MAX_PANTRY_INGREDIENTS = 15;

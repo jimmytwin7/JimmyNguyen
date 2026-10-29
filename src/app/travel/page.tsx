@@ -37,11 +37,12 @@ export default function TravelPage() {
       <div className="mx-auto max-w-[90rem] px-4 pb-24 pt-10 sm:px-6 sm:pt-14 lg:px-10">
         <header className="grid grid-cols-12 gap-x-6 gap-y-6 border-t-2 border-[var(--accent-bold)] pt-5">
           <p className="col-span-12 font-mono text-xs font-medium uppercase tracking-[0.18em] text-muted lg:col-span-3">
-            Travel journal · {span}
+            A personal map of places, memories, and experiences worth
+            revisiting.
           </p>
           <div className="col-span-12 lg:col-span-9">
             <h1 className="text-[clamp(3.5rem,11vw,9rem)] font-semibold leading-[0.85] tracking-[-0.045em] text-[var(--accent-bold)]">
-              Travel
+              Footprints
             </h1>
             <p className="mt-6 max-w-[46ch] text-lg leading-snug text-muted">
               {locations.length} places so far. Explore them on the map, or read

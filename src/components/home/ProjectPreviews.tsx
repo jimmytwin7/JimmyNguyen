@@ -65,7 +65,7 @@ export default function ProjectPreviews() {
           <div className="flex flex-1 flex-col p-6">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-display text-lg font-semibold text-app">
-                Pantry Quest
+                Scrambl
               </h3>
               <span className="editorial-meta">recipe finder</span>
             </div>
@@ -125,7 +125,7 @@ export default function ProjectPreviews() {
           <div className="flex flex-1 flex-col p-6">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="font-display text-lg font-semibold text-app">
-                Travel Map
+                Footprints
               </h3>
               <span className="editorial-meta">{locations.length} places</span>
             </div>

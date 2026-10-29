@@ -14,9 +14,9 @@ export default function PantryQuestHeader() {
         {PROJECT_NAME}
       </h1>
       <p className="mt-5 max-w-xl text-base font-medium text-muted sm:text-lg">
-        Put what&apos;s in your kitchen on the cutting board and find real
-        recipes you can make with an honest match score and ideas for
-        what&apos;s missing.
+        Turn what&apos;s left, to what&apos;s next. Put what&apos;s in your
+        kitchen on the cutting board and find real recipes you can make with an
+        honest match score and ideas for what&apos;s missing.
       </p>
     </header>
   );
