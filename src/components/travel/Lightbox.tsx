@@ -257,7 +257,7 @@ export default function Lightbox({
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute top-4 right-4 z-10 rounded-full p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+        className="absolute top-4 right-4 z-10 p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
       >
         <svg
           aria-hidden="true"
@@ -284,7 +284,7 @@ export default function Lightbox({
             e.stopPropagation();
             go(-1);
           }}
-          className="absolute left-2 sm:left-4 z-10 rounded-full p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+          className="absolute left-2 sm:left-4 z-10 p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
         >
           <svg
             aria-hidden="true"
@@ -336,7 +336,7 @@ export default function Lightbox({
             text stays legible over any photo. Same treatment on all screens —
             the conventional gallery-lightbox pattern. */}
         {photos[index].caption && (
-          <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-lg bg-gradient-to-t from-black/75 via-black/45 to-transparent px-4 pb-4 pt-12 sm:px-6 sm:pb-5">
+          <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-4 pb-4 pt-12 sm:px-6 sm:pb-5">
             <p className="mx-auto max-w-3xl text-center text-sm font-medium leading-snug text-white sm:text-base">
               {photos[index].caption}
             </p>
@@ -353,7 +353,7 @@ export default function Lightbox({
             e.stopPropagation();
             go(1);
           }}
-          className="absolute right-2 sm:right-4 z-10 rounded-full p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+          className="absolute right-2 sm:right-4 z-10 p-2 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
         >
           <svg
             aria-hidden="true"

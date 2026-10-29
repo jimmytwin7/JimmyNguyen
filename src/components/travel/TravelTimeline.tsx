@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import type { TravelLocation } from "@/lib/travel/types";
 import { formatTravelDate, sortByDateDesc } from "@/lib/travel/dates";
+import { cloudinaryLoader } from "@/lib/travel/cloudinary-loader";
 import { useInView } from "@/lib/hooks/useInView";
 import Lightbox from "./Lightbox";
 
@@ -17,11 +18,12 @@ interface TimelineEntryProps {
 }
 
 /**
- * One timeline row against the left rail. Observes itself and fades/slides in
- * the first time it scrolls into view (see useInView — a no-op under
- * reduced-motion).
+ * One journal entry on the 12-column grid: date and place in a narrow left
+ * column, title, text and photographs in the wide right column. Observes
+ * itself and sharpens the first time it scrolls into view (see useInView — a
+ * no-op under reduced-motion).
  *
- * Photos render as a horizontal filmstrip rather than a grid: a single
+ * Photos render as a tall horizontal filmstrip rather than a grid: a single
  * sideways-scrolling row so a 12-photo stop reads as "a set" and doesn't
  * balloon the entry's height past a 2-photo one. Full size is one click away in
  * the lightbox.
@@ -36,7 +38,7 @@ function TimelineEntry({ location, onOpenPhoto }: TimelineEntryProps) {
     <li
       ref={ref}
       className={[
-        "relative transition-all duration-500 ease-out motion-reduce:transition-none",
+        "grid grid-cols-12 gap-x-6 gap-y-4 border-t border-line pt-5 transition-all duration-500 ease-out motion-reduce:transition-none",
         // Stays blurred (but clearly visible, so it signals "more below") until
         // it scrolls into view, then sharpens. Doesn't re-blur on scroll-up —
         // re-blurring already-read content is annoying.
@@ -45,35 +47,28 @@ function TimelineEntry({ location, onOpenPhoto }: TimelineEntryProps) {
           : "opacity-60 blur-[6px] motion-reduce:opacity-100 motion-reduce:blur-0",
       ].join(" ")}
     >
-      {/* Node on the left rail (matches the resume rail). */}
-      <span
-        aria-hidden="true"
-        className="absolute top-1.5 left-[calc(-1.5rem-7px+0.5px)] h-3 w-3 rounded-full ring-4"
-        style={
-          {
-            backgroundColor: "var(--accent)",
-            "--tw-ring-color": "var(--surface-muted)",
-          } as React.CSSProperties
-        }
-      />
-
-      <article>
-        <time className="text-xs font-medium uppercase tracking-wide text-faint">
+      <div className="col-span-12 text-xs lg:col-span-3">
+        <time className="block font-mono font-medium uppercase tracking-[0.14em] text-accent">
           {formatTravelDate(location.date)}
         </time>
-        <h3 className="mt-1 text-lg font-bold tracking-tight text-app">
+        <p className="mt-1 text-muted">
+          {location.region}, {location.country}
+        </p>
+      </div>
+
+      <article className="col-span-12 min-w-0 lg:col-span-9">
+        <h3 className="text-[clamp(1.75rem,4vw,3rem)] font-semibold leading-[0.95] tracking-[-0.03em] text-app">
           {location.name}
         </h3>
-        <p className="text-sm text-muted">
-          {location.region} · {location.country}
+        <p className="mt-4 max-w-[56ch] leading-snug text-app">
+          {location.blurb}
         </p>
-        <p className="mt-3 leading-relaxed text-app">{location.blurb}</p>
 
         {hasPhotos && (
           <div
             // Horizontal filmstrip: fixed-height row, scrolls sideways, with the
             // next photo peeking to hint there's more. snap for a tidy stop.
-            className="mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2"
+            className="mt-6 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-3 sm:gap-3"
           >
             {location.photos.map((photo, i) => (
               <button
@@ -81,16 +76,19 @@ function TimelineEntry({ location, onOpenPhoto }: TimelineEntryProps) {
                 type="button"
                 onClick={() => onOpenPhoto(location.id, i)}
                 aria-label={`View ${location.name} photo ${i + 1} of ${location.photos.length} full screen`}
-                className="group relative aspect-[4/3] h-32 shrink-0 snap-start overflow-hidden rounded-lg bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:h-40"
-                style={{ cursor: "zoom-in" }}
+                className="group relative aspect-[4/5] h-64 shrink-0 snap-start overflow-hidden bg-surface-raised bg-cover bg-center sm:h-80"
+                style={{
+                  cursor: "zoom-in",
+                  backgroundImage: `url(${photo.blurUrl})`,
+                }}
               >
                 <Image
-                  src={photo.thumbUrl}
+                  src={photo.url}
+                  loader={cloudinaryLoader}
                   alt={`${location.name} — ${photo.label}`}
                   fill
-                  sizes="(min-width: 640px) 213px, 171px"
-                  unoptimized
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(min-width: 640px) 256px, 205px"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                 />
               </button>
             ))}
@@ -103,8 +101,8 @@ function TimelineEntry({ location, onOpenPhoto }: TimelineEntryProps) {
 
 /**
  * Chronological (newest-first) view of every location — a travelogue
- * alternative to the map. Shares the same data and lightbox. Single-column
- * left-rail timeline; entries reveal on scroll.
+ * alternative to the map. Shares the same data and lightbox. Entries reveal on
+ * scroll.
  */
 export default function TravelTimeline({ locations }: TravelTimelineProps) {
   // The lightbox works per location, so track which gallery is open + the index.
@@ -117,7 +115,7 @@ export default function TravelTimeline({ locations }: TravelTimelineProps) {
 
   return (
     <>
-      <ol className="relative ml-2 space-y-10 border-l border-line pl-6">
+      <ol className="space-y-16 sm:space-y-20">
         {ordered.map((location) => (
           <TimelineEntry
             key={location.id}

@@ -465,3 +465,234 @@ body:has(.pq-stage) {
     transform: none;
   }
 }
+
+/* ==========================================================================
+ * Editorial layer — the main portfolio's type + primitives.
+ *
+ * Appended (not merged into the first @theme block) so the existing tokens and
+ * the entire Pantry Quest `.pq-stage` / `pq-*` system above stay byte-for-byte
+ * untouched. Tailwind merges multiple @theme blocks, so these register as real
+ * utilities (font-display, font-mono). Everything visual here is opt-in via the
+ * `.editorial-*` classes, so nothing leaks into .pq-stage.
+ * ======================================================================== */
+@theme {
+  /* next/font exposes the faces as --font-space-grotesk / --font-jetbrains-mono
+     (see layout.tsx). Distinct names avoid a self-referencing variable. */
+  --font-display: var(--font-space-grotesk), var(--font-geist-sans), sans-serif;
+  --font-mono:
+    var(--font-jetbrains-mono), ui-monospace, "SF Mono", "Cascadia Code",
+    monospace;
+}
+
+/* In the components layer so Tailwind utilities (text-white, text-app,
+   hover:text-…) can still override these, as they would any component class.
+   Unlayered CSS would always beat Tailwind's layered utilities. */
+@layer components {
+  /* Numbered section label — "01 — Experience". Mono eyebrow + display title,
+   separated by a hairline that fills the row. */
+  .editorial-label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.875rem;
+    margin-bottom: 1.75rem;
+  }
+  .editorial-label__num {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .editorial-label__title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    flex-shrink: 0;
+  }
+  /* Hairline that extends the label across the remaining width. */
+  .editorial-label__rule {
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--line);
+    transform: translateY(-0.2em);
+  }
+
+  /* Small monospace metadata (dates, locations, kicker text). */
+  .editorial-meta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+
+  /* Understated technology tag: hairline outline, mono, no fill. */
+  .editorial-tag {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    color: var(--text-muted);
+    border: 1px solid var(--line);
+    border-radius: 0.375rem;
+    padding: 0.35rem 0.55rem;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+  .editorial-tag:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* Terminal-cursor accent for the hero (blinks; respects reduced motion). */
+  .editorial-caret {
+    display: inline-block;
+    width: 0.6ch;
+    height: 1.05em;
+    margin-left: 0.12em;
+    translate: 0 0.12em;
+    background: var(--accent);
+    animation: editorial-blink 1.05s step-end infinite;
+  }
+  @keyframes editorial-blink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .editorial-caret {
+      animation: none;
+    }
+  }
+
+  /* Project preview card: paper surface, hairline, lifts gently on hover. */
+  .editorial-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 1rem;
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .editorial-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -18px rgb(15 23 42 / 0.4);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .editorial-card,
+    .editorial-tag {
+      transition: none;
+    }
+    .editorial-card:hover {
+      transform: none;
+    }
+  }
+}
+
+/* ==========================================================================
+ * Travel (/travel) — a photography-led journal on a Swiss modernist grid.
+ *
+ * Scoped under .travel-stage, mirroring .pq-stage: the stage redefines the
+ * site's semantic tokens for its subtree, so travel components re-skin without
+ * touching other routes. Hard edges (no radii), one neo-grotesk face
+ * (--font-travel, loaded only by app/travel/page.tsx), a warm beige ground,
+ * and the site's brand blue as the accent, used boldly (title, thick rules,
+ * filled controls, pins). The cool accent on a warm ground is what makes the
+ * page pop, and reusing the brand blue ties /travel to the rest of the site.
+ * Unlike Pantry Quest it follows the site's dark mode.
+ *
+ * Accent tokens: --accent is for small accent text and the focus ring;
+ * --accent-bold is for large elements and fills; --on-accent is text placed on
+ * an --accent-bold fill. They match for brand blue, but stay separate so a
+ * palette with a light accent (e.g. orange) can use its bright shade on large
+ * elements and a darker shade for small text.
+ * ======================================================================== */
+.travel-stage {
+  --surface: #fbfaf7;
+  --surface-muted: #f4f3ef; /* page ground */
+  --surface-raised: #e9e7e1; /* photo placeholders */
+  --text: #111111;
+  --text-muted: #555555;
+  --text-faint: #6b6b6b; /* 4.8:1 on the ground */
+  --border: #d9d6cf;
+  --line: #d9d6cf;
+  --accent: var(--color-brand-700); /* #0369a1, 5.3:1 on the ground */
+  --accent-bold: var(--color-brand-700);
+  --on-accent: #ffffff; /* 5.9:1 on brand-700 */
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-raised: var(--surface-raised);
+  --color-app: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-edge: var(--border);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+
+  font-family: var(--font-travel), var(--font-sans), sans-serif;
+  color: var(--text);
+  background: var(--surface-muted);
+  /* Full-bleed under the nav: break out of the layout's max-width + padding,
+     so the photo grid can run wider than the rest of the site. */
+  width: 100vw;
+  margin-inline: calc(50% - 50vw);
+  margin-block: -2.5rem; /* cancels <main> py-10 */
+  min-height: calc(100dvh - 4rem); /* viewport minus the 4rem header */
+}
+
+/* Night gallery: a warm charcoal ground (the beige's night twin), warm light
+   ink, and the site's brighter dark-mode brand blue as the accent. */
+.dark .travel-stage {
+  --surface: #1c1a16;
+  --surface-muted: #15130f; /* warm charcoal: the beige's night twin */
+  --surface-raised: #26231e;
+  --text: #ece8df;
+  --text-muted: #a8a196;
+  --text-faint: #8c867b; /* 5.1:1 */
+  --border: #2e2a24;
+  --line: #2e2a24;
+  --accent: var(--color-brand-500); /* #0ea5e9, 6.7:1 */
+  --accent-bold: var(--color-brand-500);
+  --on-accent: #0a0a0a; /* 7.1:1; white fails on brand-500 */
+}
+
+/* On /travel only, the site header and footer take the stage's ground so the
+   page reads as one surface with no white/slate band. Both are direct children
+   of <body> (see app/layout.tsx), so `>` can't match the travel page's own
+   <header> inside .travel-stage. Unlayered on purpose, so it beats Tailwind's
+   bg-surface/80 and border-line utilities on those elements. */
+body:has(.travel-stage) > header,
+body:has(.travel-stage) > footer {
+  background-color: rgb(244 243 239 / 0.85); /* #f4f3ef */
+  border-color: #d9d6cf;
+}
+.dark body:has(.travel-stage) > header,
+.dark body:has(.travel-stage) > footer {
+  background-color: rgb(21 19 15 / 0.85); /* #15130f */
+  border-color: #2e2a24;
+}
+
+/* The 100vw breakout includes the scrollbar; clip only on this page. */
+body:has(.travel-stage) {
+  overflow-x: clip;
+}
+
+/* Hard-edged focus ring in the stage's accent. */
+.travel-stage *:focus-visible {
+  outline-color: var(--accent);
+  border-radius: 0;
+}

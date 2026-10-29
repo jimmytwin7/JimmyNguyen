@@ -12,7 +12,8 @@ import type { NextConfig } from "next";
  *   for inline/blur placeholders.
  * - `connect-src`: TheMealDB is never called from the browser (the API routes
  *   proxy it server-side), but Vercel Analytics beacons to vercel-insights.
- * - `font-src 'self'`: next/font self-hosts the Figtree font; no external CDN.
+ * - `font-src 'self'`: next/font self-hosts every font (Figtree, Space Grotesk,
+ *   JetBrains Mono, Inter Tight, M PLUS Rounded); no external CDN.
  */
 const CSP = [
   "default-src 'self'",

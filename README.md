@@ -20,16 +20,18 @@ them are optional (see `.env.example`): Cloudinary credentials only matter for
 re-syncing travel photos ([Photos](#photos-cloudinary--committed-manifest)), and
 `RECIPE_API_KEY` is an optional TheMealDB supporter key for Pantry Quest.
 
-| Script                   | What it does                                      |
-| ------------------------ | ------------------------------------------------- |
-| `npm run dev`            | Dev server with hot reload                        |
-| `npm run build`          | Production build                                  |
-| `npm start`              | Serve the production build                        |
-| `npm run lint`           | ESLint — `eslint-config-next` + full `jsx-a11y`   |
-| `npm run format`         | Format the whole project with Prettier            |
-| `npm run format:check`   | Check formatting without writing (CI / hook)      |
-| `npm test`               | Vitest — unit, API route, and UI tests (one run)  |
-| `npm run refresh:photos` | Re-sync the travel photo manifest from Cloudinary |
+| Script                       | What it does                                         |
+| ---------------------------- | ---------------------------------------------------- |
+| `npm run dev`                | Dev server with hot reload                           |
+| `npm run build`              | Production build                                     |
+| `npm start`                  | Serve the production build                           |
+| `npm run lint`               | ESLint — `eslint-config-next` + full `jsx-a11y`      |
+| `npm run format`             | Format the whole project with Prettier               |
+| `npm run format:check`       | Check formatting without writing (CI / hook)         |
+| `npm test`                   | Vitest — unit, API route, and UI tests (one run)     |
+| `npm run test:watch`         | Vitest in watch mode                                 |
+| `npm run refresh:photos`     | Re-sync the travel photo manifest from Cloudinary    |
+| `npm run upload:ingredients` | Upload Pantry Quest's ingredient icons to Cloudinary |
 
 ## Code quality
 
@@ -119,7 +121,39 @@ The travel map is a special case: its colors are JavaScript values baked into
 SVG fills, not CSS, so tokens can't reach them. `WorldMap.tsx` keeps a
 `LIGHT_PALETTE`/`DARK_PALETTE` pair and a `useIsDark()` hook that watches the
 `.dark` class with a `MutationObserver`, so the map recolors live when you
-toggle.
+toggle. Those hex values mirror the `.travel-stage` colors and have to be kept
+in sync by hand.
+
+### Three visual identities
+
+The portfolio and its two projects share the token system but look
+deliberately different. Each project redefines the semantic tokens on its own
+wrapper element, so its styles apply only inside that route:
+
+| Scope          | Defined in                                        | Look                                                                                                                                                                  |
+| -------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Main portfolio | `:root` / `.dark` plus the `.editorial-*` classes | Editorial minimalism: Space Grotesk headings, JetBrains Mono metadata, numbered section labels ("01 — Currently"), hairline rules, outline tech tags, one blue accent |
+| Pantry Quest   | `.pq-stage`                                       | Pixel-art cooking game in a warm farmhouse palette. Always light, even in dark mode.                                                                                  |
+| Travel         | `.travel-stage`                                   | Photography-led journal on a Swiss grid: warm beige ground, the brand blue used boldly, Inter Tight, hard edges                                                       |
+
+Notes:
+
+- The `.editorial-*` classes live in Tailwind's `components` layer, so
+  utilities such as `text-white` can still override them. Unlayered CSS would
+  always win over Tailwind's layered utilities.
+- Space Grotesk and JetBrains Mono load once in `layout.tsx` and back the
+  `font-display` and `font-mono` utilities. Inter Tight (Travel) and M PLUS
+  Rounded (Pantry Quest) load only on their own routes. All fonts come through
+  `next/font`, so they're self-hosted.
+- Travel has two extra accent tokens: `--accent-bold` for the large title,
+  thick rules, and filled controls, and `--on-accent` for text on those fills.
+  They match for brand blue, but stay separate so a lighter accent (orange, for
+  example) can use its bright shade on large elements and a darker one for
+  small text. Changing Travel's colors only means editing the values in
+  `.travel-stage` / `.dark .travel-stage` and the map palette.
+- On `/travel` only, an unlayered rule (`body:has(.travel-stage) > header`)
+  gives the site header and footer the page's beige, so there's no white or
+  slate band. It relies on both being direct children of `<body>`.
 
 ### Project structure
 
@@ -134,9 +168,11 @@ src/
     api/recipes/        # GET  — search TheMealDB, score against the pantry
     api/substitutions/  # POST — dictionary-based substitution ideas
     not-found.tsx
-    globals.css         # Tailwind v4 @theme + light/dark semantic tokens
+    globals.css         # Tailwind v4 @theme, semantic tokens, editorial layer,
+                        #   .pq-stage and .travel-stage
   components/
-    home/               # Typewriter, CurrentlySection (lucide icon carousel), InterestsBento
+    home/               # Typewriter, CurrentlySection (lucide icon carousel),
+                        #   InterestsBento, ProjectPreviews
     nav/                # Nav + desktop/mobile variants, active-route NavLink
     resume/             # experience, skills, education sections (used by /experience)
     travel/             # TravelViews (map/timeline toggle), TravelMapClient,
@@ -149,7 +185,8 @@ src/
   lib/
     cooking/            # pure matching/normalizing/filter logic + server/ adapters
     data/               # resume content (experience, skills, education)
-    travel/             # locations, types, loader, dates, photos.manifest.json
+    travel/             # locations, types, loader, dates, masonry,
+                        #   cloudinary-loader, photos.manifest.json
     hooks/              # useInView (scroll-reveal via IntersectionObserver)
     utils/              # sort helpers
 public/
@@ -158,7 +195,10 @@ public/
   headshot.jpg
   umn.png               # university logo used by the education section
 scripts/
-  refresh-photos.mjs    # regenerates the photo manifest from Cloudinary
+  refresh-photos.mjs      # regenerates the photo manifest from Cloudinary
+  upload-ingredients.mjs  # uploads Pantry Quest's licensed icons to Cloudinary
+docs/
+  pantry-quest.md         # Pantry Quest write-up
 ```
 
 ---
@@ -167,9 +207,10 @@ scripts/
 
 `/travel` offers two views of the same data, switched by a toggle (`TravelViews`):
 
-- **Map** — an interactive SVG world map. Clicking a pin zooms to that location
-  and shows its blurb and photo grid below; clicking a photo opens a full-screen
-  lightbox.
+- **Map** — an interactive SVG world map with a numbered location index beside
+  it (below it on mobile). Choosing a pin or an index entry zooms to that
+  location and shows its details below, with its photos in an asymmetric
+  masonry. Clicking a photo opens a full-screen lightbox.
 - **Timeline** — the same locations as a newest-first vertical timeline
   (`TravelTimeline`), each entry with its date, blurb, and a horizontal photo
   filmstrip. Entries reveal on scroll via the `useInView` hook (a no-op under
@@ -181,17 +222,26 @@ timeline parses to real `Date`s.
 
 ### How it fits together
 
-| File                                    | Role                                                      |
-| --------------------------------------- | --------------------------------------------------------- |
-| `src/app/travel/page.tsx`               | Server component; loads locations and passes them down    |
-| `components/travel/TravelMapClient.tsx` | Owns the selected-location state                          |
-| `components/travel/WorldMap.tsx`        | SVG map, basemap layers, pins, zoom behavior              |
-| `components/travel/LocationPanel.tsx`   | Detail panel and photo grid                               |
-| `components/travel/Lightbox.tsx`        | Full-screen photo viewer                                  |
-| `lib/travel/locations.ts`               | The locations themselves (single source of truth)         |
-| `lib/travel/types.ts`                   | `TravelLocation` / `TravelPhoto` types                    |
-| `lib/travel/loader.ts`                  | `loadTravelLocations()` — joins locations to the manifest |
-| `lib/travel/photos.manifest.json`       | Committed Cloudinary photo index                          |
+| File                                    | Role                                                                                     |
+| --------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `src/app/travel/page.tsx`               | Server component; loads locations, renders the header and stats, sets up `.travel-stage` |
+| `components/travel/TravelViews.tsx`     | Map/Timeline switch                                                                      |
+| `components/travel/TravelMapClient.tsx` | Owns the selected-location state; lays out the map and the location index                |
+| `components/travel/WorldMap.tsx`        | SVG map, basemap layers, pins, zoom behavior                                             |
+| `components/travel/LocationPanel.tsx`   | Detail panel and photo masonry                                                           |
+| `components/travel/TravelTimeline.tsx`  | Newest-first timeline with photo filmstrips                                              |
+| `components/travel/Lightbox.tsx`        | Full-screen photo viewer                                                                 |
+| `lib/travel/locations.ts`               | The locations themselves (single source of truth)                                        |
+| `lib/travel/types.ts`                   | `TravelLocation` / `TravelPhoto` types                                                   |
+| `lib/travel/loader.ts`                  | `loadTravelLocations()` — joins locations to the manifest                                |
+| `lib/travel/masonry.ts`                 | Frame sizes for the photo masonry                                                        |
+| `lib/travel/cloudinary-loader.ts`       | `next/image` loader that requests fixed widths from Cloudinary                           |
+| `lib/travel/photos.manifest.json`       | Committed Cloudinary photo index                                                         |
+
+The photo masonry is a 6-column grid filled in repeating blocks of seven
+frames: one large, two small, one tall, one wide, two small. A partial last
+block switches to half-width pairs, so any photo count fills complete rows with
+no gaps. A test checks every count from 1 to 40.
 
 `loadTravelLocations()` is the seam worth understanding: it merges the
 hand-written locations with the generated photo manifest, so location metadata
@@ -255,6 +305,15 @@ needed in CI or on Vercel**.
 
 The manifest stores a full-size URL, a thumbnail URL, a tiny blurred
 placeholder, a label, and an optional caption per photo.
+
+**Delivery sizes.** Travel photos load through a small `next/image` loader
+(`lib/travel/cloudinary-loader.ts`). It changes the width in the Cloudinary URL
+instead of sending photos through Next's image optimizer. Requested widths are
+rounded up to 480, 800, 1200, or 1600px, so each photo has at most four resized
+copies on Cloudinary. That matters because each new width counts toward
+Cloudinary's transformation quota the first time it's generated. The 1600px
+size reuses the manifest's lightbox URL. The loader only rewrites delivery URLs
+and never calls the Admin API.
 
 **One-time setup** (only if you're re-syncing photos)
 
@@ -327,12 +386,21 @@ formula, substitution safety rules, env vars, and limitations — in
 - **Nav** — `NavLink` marks the active route with `aria-current="page"`. The
   mobile menu traps focus via `FocusTrapper` and restores it on close.
 - **`CurrentlySection`** — a horizontal "currently" carousel with lucide-react
-  icons and a pulsing live dot. Three items show at a time on desktop (center
-  sharp, neighbors dimmed), falling back to a single centered item on mobile;
-  it advances on a timer and loops seamlessly via clone-padding and a silent
-  reset.
+  icons. Three items show at a time on desktop (center sharp, neighbors
+  dimmed), falling back to a single left-aligned item on mobile; it advances on
+  a timer and loops seamlessly via clone-padding and a silent reset. Its
+  heading and pulsing live dot are in the page's "01 — Currently" label.
 - **`Typewriter`** — types out the hero heading, then the paragraph after a
-  delay, so the two don't animate over each other.
+  delay, so the two don't animate over each other. An invisible copy of the
+  full text reserves the final size from the first frame, so lines wrapping in
+  don't shift the layout (such as the headshot beside it). An optional `caret`
+  prop sets the cursor; the heading uses a blinking blue block.
+- **`InterestsBento`** — interest tiles with hand-drawn SVG line illustrations
+  in the accent color. Tiles with more detail flip on click, Enter, or Space
+  (`aria-pressed`).
+- **`ProjectPreviews`** — the home page's "Selected projects" cards. Pantry
+  Quest's card uses real pixel ingredient sprites and Travel's uses a real
+  photo from the manifest, so each card hints at its project's own look.
 - **`CursorDot`** — a custom trailing cursor, deliberately disabled on `/travel`
   where it would fight the map's own interactions.
 - **`ThemeToggle`** — the light/dark switch in the header; see
@@ -347,9 +415,9 @@ country and US state as an SVG `<path>`, which screen readers announce as
 far worse to navigate. Those shapes can't be usefully labelled, so the whole
 visualisation is marked presentational.
 
-The accessible equivalent is the **"Jump to a location" list** beneath it: a
-labelled `<nav>` of real `<button>`s, one per location, with `aria-pressed`
-reflecting the current selection. It does everything the pins do. Because the
+The accessible equivalent is the numbered **"Jump to a location" index** beside
+it (below it on mobile): a labelled `<nav>` of real `<button>`s, one per
+location, with `aria-pressed` reflecting the current selection. It does everything the pins do. Because the
 map subtree is `aria-hidden`, the pins are deliberately **not** focusable
 (`tabIndex={-1}`) — a focusable element inside `aria-hidden` is an ARIA
 violation — so they're a mouse/touch affordance only.
@@ -376,6 +444,19 @@ variables configured**. Pantry Quest's optional `RECIPE_API_KEY` can be set in
 Vercel's project environment variables if you want it (see
 [docs/pantry-quest.md](docs/pantry-quest.md#deployment)).
 
+## Security headers
+
+`next.config.ts` sends a Content-Security-Policy on every route, plus
+`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`,
+and a `Permissions-Policy` that turns off the camera, microphone, and
+geolocation. Keep these in sync when changing the site:
+
+- **New image host:** add it to both `images.remotePatterns` and the CSP's
+  `img-src`. Otherwise `next/image` rejects it or the browser blocks it.
+- **New third-party script or API:** add it to `script-src` or `connect-src`.
+- `'unsafe-inline'` stays in `script-src` because next-themes injects a
+  pre-paint inline script to restore the saved theme.
+
 ## Data attribution
 
 - Country and US state shapes: [world-atlas](https://github.com/topojson/world-atlas)
@@ -401,3 +482,6 @@ into `public/geo/`, never imported at runtime.
   derived from the location list.
 - Photo captions and ordering are managed in Cloudinary rather than in the repo,
   so changing them requires a manifest refresh and a redeploy.
+- The travel map's colors are hex values in `WorldMap.tsx` that duplicate the
+  `.travel-stage` colors in `globals.css`, so a color change has to be made in
+  both places.

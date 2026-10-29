@@ -20,35 +20,42 @@ export default function TravelViews({ locations }: TravelViewsProps) {
   const [view, setView] = useState<View>("map");
 
   return (
-    <div className="space-y-6">
-      <div
-        role="radiogroup"
-        aria-label="Choose how to view my travels"
-        className="inline-flex rounded-full border border-line bg-surface p-1"
-      >
-        {(
-          [
-            ["map", "Map"],
-            ["timeline", "Timeline"],
-          ] as const
-        ).map(([value, label]) => {
-          const active = view === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => setView(value)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                active ? "text-white" : "text-muted hover:text-app"
-              }`}
-              style={active ? { backgroundColor: "var(--accent)" } : undefined}
-            >
-              {label}
-            </button>
-          );
-        })}
+    <div className="mt-14 sm:mt-20">
+      <div className="mb-10 flex items-center justify-between gap-4 border-t border-line pt-4">
+        <span className="font-mono text-xs uppercase tracking-[0.14em] text-muted">
+          View
+        </span>
+        {/* Hard-edged segmented control: the active option inverts to ink. */}
+        <div
+          role="radiogroup"
+          aria-label="Choose how to view my travels"
+          className="inline-flex border border-[var(--accent-bold)]"
+        >
+          {(
+            [
+              ["map", "Map"],
+              ["timeline", "Timeline"],
+            ] as const
+          ).map(([value, label]) => {
+            const active = view === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => setView(value)}
+                className={`px-4 py-2 font-mono text-xs font-medium uppercase tracking-[0.14em] transition-colors ${
+                  active
+                    ? "bg-[var(--accent-bold)] text-[var(--on-accent)]"
+                    : "text-muted hover:text-app"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {view === "map" ? (

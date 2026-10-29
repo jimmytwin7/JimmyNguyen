@@ -17,24 +17,21 @@ export default function ExperienceItem({ company }: ExperienceItemProps) {
   return (
     <article>
       {/* Company header */}
-      <p
-        className="text-base font-semibold mb-2"
-        style={{ color: "var(--accent)" }}
-      >
+      <p className="mb-3 font-display text-base font-semibold text-app">
         {name}
         {location && (
-          <span className="text-muted font-normal"> · {location}</span>
+          <span className="editorial-meta ml-2 font-normal">{location}</span>
         )}
       </p>
 
       {/* Roles */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {roles.map((role, index) => (
           <div key={`${role.title}-${role.startDate}-${index}`}>
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 mb-2">
+            <div className="mb-2 flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
               <h3 className="text-base font-semibold text-app">{role.title}</h3>
               <time
-                className="text-sm text-muted shrink-0 sm:text-right"
+                className="editorial-meta shrink-0 sm:text-right"
                 dateTime={`${role.startDate}/${role.endDate === "present" ? "" : role.endDate}`}
               >
                 {formatDate(role.startDate)} – {formatDate(role.endDate)}
@@ -42,10 +39,17 @@ export default function ExperienceItem({ company }: ExperienceItemProps) {
             </div>
 
             {role.bullets.length > 0 && (
-              <ul className="list-disc list-outside pl-5 space-y-1">
+              <ul className="space-y-1.5">
                 {role.bullets.map((bullet, bi) => (
-                  <li key={bi} className="text-app leading-relaxed text-sm">
-                    {bullet}
+                  <li
+                    key={bi}
+                    className="flex gap-2.5 text-sm leading-relaxed text-app"
+                  >
+                    {/* Dash marker, echoing the reference's dense bullet list. */}
+                    <span aria-hidden="true" className="select-none text-faint">
+                      –
+                    </span>
+                    <span>{bullet}</span>
                   </li>
                 ))}
               </ul>

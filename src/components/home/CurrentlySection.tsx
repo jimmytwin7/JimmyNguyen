@@ -77,30 +77,9 @@ export default function CurrentlySection() {
   const step = active;
 
   return (
-    <section
-      aria-labelledby="currently-heading"
-      className="rounded-2xl border border-edge bg-surface p-5 shadow-lg sm:p-8"
-    >
-      <div className="mb-4 flex items-center gap-2">
-        {/* Pulsing live dot — the "this is current" cue. */}
-        <span className="relative flex h-2 w-2" aria-hidden="true">
-          <span
-            className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 motion-reduce:hidden"
-            style={{ backgroundColor: "var(--accent)" }}
-          />
-          <span
-            className="relative inline-flex h-2 w-2 rounded-full"
-            style={{ backgroundColor: "var(--accent)" }}
-          />
-        </span>
-        <h2
-          id="currently-heading"
-          className="text-xs font-semibold uppercase tracking-wide text-muted sm:text-sm"
-        >
-          Currently
-        </h2>
-      </div>
-
+    // The heading ("01 — Currently") and live dot live in the page's editorial
+    // label, which also labels this region, so there's no inner heading here.
+    <div className="rounded-2xl border border-line bg-surface px-4 py-5 sm:p-8">
       {/* Viewport. On mobile each item is full width (1-up); on sm+ each item is
           a third, so the active item is flanked by blurred neighbors.
 
@@ -133,7 +112,9 @@ export default function CurrentlySection() {
               <div
                 key={`${item.label}-${i}`}
                 // Full width on mobile, a third on sm+ (the 3-up view).
-                className="flex h-full w-full shrink-0 items-center justify-center gap-3 px-2 transition-all duration-500 sm:w-1/3 sm:gap-4"
+                // Left-aligned on mobile to match the editorial left edge;
+                // centered on sm+ where the active item sits between neighbors.
+                className="flex h-full w-full shrink-0 items-center justify-start gap-3 px-2 transition-all duration-500 sm:w-1/3 sm:justify-center sm:gap-4"
                 style={{
                   opacity: isActive ? 1 : 0.2,
                 }}
@@ -163,6 +144,6 @@ export default function CurrentlySection() {
           })}
         </div>
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Figtree } from "next/font/google";
+import { Figtree, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import Nav from "@/components/nav/Nav";
@@ -8,6 +8,7 @@ import CursorDot from "@/components/ui/CursorDot";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import ThemeProvider from "@/components/ui/ThemeProvider";
+import { usePathname } from "next/navigation";
 
 // Figtree — a warm, slightly rounded sans for body text. Keeps the
 // `--font-geist-sans` CSS variable name so globals.css and the font-sans
@@ -15,6 +16,22 @@ import ThemeProvider from "@/components/ui/ThemeProvider";
 const fontSans = Figtree({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+});
+
+// Space Grotesk — a geometric grotesque for expressive editorial headings.
+// globals.css maps --font-space-grotesk to the `font-display` utility.
+const fontDisplay = Space_Grotesk({
+  variable: "--font-space-grotesk",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// JetBrains Mono — for small technical metadata: section numbers, dates,
+// labels, and tech tags. Mapped to the `font-mono` utility in globals.css.
+const fontMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const SITE_URL = "https://heyjimmynguyen.com";
@@ -56,26 +73,30 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
   return (
-    <html lang="en" suppressHydrationWarning className={fontSans.variable}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${fontSans.variable} ${fontDisplay.variable} ${fontMono.variable}`}
+    >
       <body className="font-sans antialiased min-h-screen flex flex-col">
         <ThemeProvider>
           <CursorDot />
-          <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur-sm">
-            <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <header className="sticky top-0 z-30 border-b border-line bg-surface/80 backdrop-blur-sm">
+            <div
+              className={`mx-auto ${pathname === "/travel" ? "max-w-[90rem]" : "max-w-5xl"} px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between`}
+            >
               <Link
                 href="/"
-                className="font-semibold text-lg tracking-tight"
-                style={{ color: "var(--accent)" }}
+                className="flex items-center font-display font-semibold text-lg tracking-tight text-app"
               >
-                <div className="flex items-center">
-                  <img
-                    src="/header-icon.png"
-                    alt="Hey Jimmy Nguyen"
-                    className="h-10 w-auto"
-                  />
-                  <p className="p-2">Jimmy Nguyen</p>
-                </div>
+                <img
+                  src="/header-icon.png"
+                  alt="Hey Jimmy Nguyen"
+                  className="h-9 w-auto"
+                />
+                <span className="pl-2">Jimmy Nguyen</span>
               </Link>
               <div className="flex items-center gap-2">
                 <Nav />

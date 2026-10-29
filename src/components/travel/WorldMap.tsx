@@ -63,36 +63,53 @@ interface MapPalette {
   stateLine: string;
   graticule: string;
   cityDot: string;
+  pin: string;
+  pinSelected: string;
+  tooltipBg: string;
+  tooltipText: string;
 }
 
-// Light: classic atlas — blue ocean + warm tan land, sage-green visited fills.
+// Light: a quiet paper map under the photographs. The ocean matches the beige
+// page so countries sit directly on it; land is the lighter cream with
+// hairline borders, visited countries a brand-blue tint, and pins brand blue
+// (brand-700) to match the travel stage's accent (see .travel-stage in
+// globals.css).
 const LIGHT_PALETTE: MapPalette = {
-  ocean: "#a9d3e8",
-  land: "#e2cfa4",
-  landHover: "#d8c092",
-  landStroke: "#b89b6a",
-  visited: "#6b9e5e",
-  visitedHover: "#7fb271",
-  visitedStroke: "#4f7a45",
-  stateLine: "#4f7a45",
-  graticule: "#8bbdd6",
-  cityDot: "#6b5842",
+  ocean: "#f4f3ef",
+  land: "#fbfaf7",
+  landHover: "#f0eee9",
+  landStroke: "#d9d6cf",
+  visited: "#b9d7ea",
+  visitedHover: "#a5cbe3",
+  visitedStroke: "#fbfaf7",
+  stateLine: "#fbfaf7",
+  graticule: "#e9e7e1",
+  cityDot: "#333333",
+  pin: "#0369a1",
+  pinSelected: "#0c4a6e",
+  tooltipBg: "#0369a1",
+  tooltipText: "#ffffff",
 };
 
-// Dark: deep-slate night map — muted land against a deep-blue ocean, with a
-// lightened sage so visited countries still read against the dark fills. The
-// red travel pins are unchanged and pop nicely on this palette.
+// Dark: the same map as a night gallery. The ocean matches the warm charcoal
+// page so countries sit directly on it; land is a lifted charcoal, visited
+// countries a deep brand-blue tint, and pins the brighter dark-mode brand blue
+// (brand-500).
 const DARK_PALETTE: MapPalette = {
-  ocean: "#0b1f33",
-  land: "#33415580", // slate-700 @ 50% so land sits just above the ocean
-  landHover: "#3f4f68",
-  landStroke: "#475569",
-  visited: "#3f7d4e",
-  visitedHover: "#4c9760",
-  visitedStroke: "#6ee7a8",
-  stateLine: "#6ee7a8",
-  graticule: "#1e3a52",
-  cityDot: "#94a3b8",
+  ocean: "#15130f",
+  land: "#24211c",
+  landHover: "#2c2822",
+  landStroke: "#15130f",
+  visited: "#0c4a6e",
+  visitedHover: "#0f5a85",
+  visitedStroke: "#15130f",
+  stateLine: "#15130f",
+  graticule: "#1c1a16",
+  cityDot: "#a8a196",
+  pin: "#0ea5e9",
+  pinSelected: "#7dd3fc",
+  tooltipBg: "#0ea5e9",
+  tooltipText: "#0a0a0a",
 };
 
 interface WorldMapProps {
@@ -171,7 +188,7 @@ export default function WorldMap({
   if (!mounted) {
     return (
       <div
-        className="overflow-hidden rounded-2xl border border-edge shadow-sm"
+        className="overflow-hidden border border-line"
         style={{ backgroundColor: palette.ocean, aspectRatio: "900 / 450" }}
         aria-hidden="true"
       />
@@ -193,10 +210,7 @@ export default function WorldMap({
      * (a focusable aria-hidden element is an ARIA violation), so the pins are
      * mouse/touch only — see the Marker tabIndex={-1} below.
      */
-    <div
-      aria-hidden="true"
-      className="overflow-hidden rounded-2xl border border-edge shadow-sm"
-    >
+    <div aria-hidden="true" className="overflow-hidden border border-line">
       <ComposableMap
         projection="geoEqualEarth"
         width={900}
@@ -378,7 +392,7 @@ export default function WorldMap({
                       {/* teardrop body: rounded top tapering to a point at (0,0) */}
                       <path
                         d="M0 0 C -4.2 -6, -6 -8.6, -6 -12 A 6 6 0 1 1 6 -12 C 6 -8.6, 4.2 -6, 0 0 Z"
-                        fill={isSelected ? "#b91c1c" : "#ef4444"}
+                        fill={isSelected ? palette.pinSelected : palette.pin}
                         stroke="#ffffff"
                         strokeWidth={1.2}
                       />
@@ -397,21 +411,18 @@ export default function WorldMap({
                               y={-19}
                               width={w}
                               height={18}
-                              rx={4}
-                              fill="#0f172a"
-                              opacity={0.92}
+                              fill={palette.tooltipBg}
                             />
                             <polygon
                               points="-4,-1 4,-1 0,3"
-                              fill="#0f172a"
-                              opacity={0.92}
+                              fill={palette.tooltipBg}
                             />
                             <text
                               y={-7}
                               textAnchor="middle"
                               fontSize={11}
                               fontWeight={600}
-                              fill="#ffffff"
+                              fill={palette.tooltipText}
                             >
                               {label}
                             </text>
