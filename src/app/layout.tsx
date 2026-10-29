@@ -8,7 +8,6 @@ import CursorDot from "@/components/ui/CursorDot";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import ThemeProvider from "@/components/ui/ThemeProvider";
-import { usePathname } from "next/navigation";
 
 // Figtree — a warm, slightly rounded sans for body text. Keeps the
 // `--font-geist-sans` CSS variable name so globals.css and the font-sans
@@ -73,7 +72,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
   return (
     <html
       lang="en"
@@ -84,9 +82,7 @@ export default function RootLayout({
         <ThemeProvider>
           <CursorDot />
           <header className="sticky top-0 z-30 border-b border-line bg-surface/80 backdrop-blur-sm">
-            <div
-              className={`mx-auto ${pathname === "/travel" ? "max-w-[90rem]" : "max-w-5xl"} px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between`}
-            >
+            <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
               <Link
                 href="/"
                 className="flex items-center font-display font-semibold text-lg tracking-tight text-app"
