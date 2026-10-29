@@ -135,18 +135,10 @@ export default function HomePage() {
           <span className="editorial-label__rule" aria-hidden="true" />
         </div>
         <p className="max-w-xl text-lg leading-relaxed text-muted">
-          Open to connecting — about engineering, a project idea, or just to say
+          Open to connecting about engineering, a project idea, or just to say
           hi. The quickest ways to reach me:
         </p>
         <div className="mt-6 flex flex-wrap gap-4">
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-line px-5 py-2.5 font-medium text-app transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-          >
-            GitHub ↗
-          </a>
           <a
             href={LINKEDIN_URL}
             target="_blank"

@@ -87,11 +87,6 @@ export default function RootLayout({
                 href="/"
                 className="flex items-center font-display font-semibold text-lg tracking-tight text-app"
               >
-                <img
-                  src="/header-icon.png"
-                  alt="Hey Jimmy Nguyen"
-                  className="h-9 w-auto"
-                />
                 <span className="pl-2">Jimmy Nguyen</span>
               </Link>
               <div className="flex items-center gap-2">

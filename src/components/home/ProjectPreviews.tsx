@@ -78,7 +78,7 @@ export default function ProjectPreviews() {
               cooking game: drop ingredients on a cutting board, and it searches
               real recipes from TheMealDB, scores each by a deterministic
               ingredient-match percentage, and walks through steps in Cooking
-              Mode — served from two small serverless routes.
+              Mode, served from two small serverless routes.
             </p>
             <ul className="mt-auto flex flex-wrap gap-2 pt-2">
               {PANTRY_TAGS.map((tag) => (
@@ -130,8 +130,8 @@ export default function ProjectPreviews() {
               <span className="editorial-meta">{locations.length} places</span>
             </div>
             <p className="mb-2 text-sm leading-relaxed text-muted">
-              <span className="font-medium text-app">Idea.</span> A place to
-              revisit trips as photographs, not pins on a dashboard.
+              <span className="font-medium text-app">Idea.</span> Give all your
+              travel adventures one portfolio
             </p>
             <p className="mb-4 text-sm leading-relaxed text-muted">
               <span className="font-medium text-app">Build.</span> An
