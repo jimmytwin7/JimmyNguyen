@@ -38,6 +38,17 @@ const BLOCK: Frame[] = [
   { cols: 2, rows: 1, wide: false },
 ];
 
+/**
+ * `sizes` for a frame's next/image. Shared by the photo panel and the photo
+ * hand-off, so both request the same Cloudinary derivative and the hand-off
+ * photo is already cached when the real tile appears.
+ */
+export function frameSizes(frame: Frame): string {
+  return frame.wide
+    ? "(min-width: 1024px) 60vw, 100vw"
+    : "(min-width: 640px) 30vw, 50vw";
+}
+
 /** Frame for photo `i` (0-based) in a set of `total` photos. */
 export function frameFor(i: number, total: number): Frame {
   const blockStart = Math.floor(i / BLOCK.length) * BLOCK.length;

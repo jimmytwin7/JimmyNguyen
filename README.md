@@ -208,9 +208,14 @@ docs/
 `/travel` offers two views of the same data, switched by a toggle (`TravelViews`):
 
 - **Map** — an interactive SVG world map with a numbered location index beside
-  it (below it on mobile). Choosing a pin or an index entry zooms to that
-  location and shows its details below, with its photos in an asymmetric
-  masonry. Clicking a photo opens a full-screen lightbox.
+  it (below it on mobile), and footprint pins marking each place. Choosing a
+  pin or an index entry flies the map to that location in one smooth move (the
+  zoom eases in log space and pulls out mid-flight on long hops), then a
+  decorative copy of the location's first photo grows out of the pin and rides
+  the scroll down onto the first tile of the photo masonry. The details appear
+  below with the photos in an asymmetric masonry; clicking a photo opens a
+  full-screen lightbox. Under `prefers-reduced-motion` the map jumps instantly,
+  there's no photo hand-off, and the page jumps to the panel.
 - **Timeline** — the same locations as a newest-first vertical timeline
   (`TravelTimeline`), each entry with its date, blurb, and a horizontal photo
   filmstrip. Entries reveal on scroll via the `useInView` hook (a no-op under
@@ -227,10 +232,13 @@ timeline parses to real `Date`s.
 | `src/app/travel/page.tsx`               | Server component; loads locations, renders the header and stats, sets up `.travel-stage` |
 | `components/travel/TravelViews.tsx`     | Map/Timeline switch                                                                      |
 | `components/travel/TravelMapClient.tsx` | Owns the selected-location state; lays out the map and the location index                |
-| `components/travel/WorldMap.tsx`        | SVG map, basemap layers, pins, zoom behavior                                             |
+| `components/travel/WorldMap.tsx`        | SVG map, basemap layers, footprint pins, the fly-to camera                               |
+| `components/travel/PhotoHandoff.tsx`    | Decorative photo that grows from the pin and lands on the first masonry tile             |
 | `components/travel/LocationPanel.tsx`   | Detail panel and photo masonry                                                           |
 | `components/travel/TravelTimeline.tsx`  | Newest-first timeline with photo filmstrips                                              |
 | `components/travel/Lightbox.tsx`        | Full-screen photo viewer                                                                 |
+| `lib/travel/camera.ts`                  | Fly-to camera maths (centre, log-space zoom with mid-flight dip, duration)               |
+| `lib/travel/handoff.ts`                 | Photo hand-off geometry (frame rects, scroll target)                                     |
 | `lib/travel/locations.ts`               | The locations themselves (single source of truth)                                        |
 | `lib/travel/types.ts`                   | `TravelLocation` / `TravelPhoto` types                                                   |
 | `lib/travel/loader.ts`                  | `loadTravelLocations()` — joins locations to the manifest                                |
@@ -258,7 +266,7 @@ no runtime data dependency:
 - `countries-110m.json` — country outlines; visited countries are filled from a
   hardcoded ISO-code set (`visitedCountryIds` in `locations.ts`)
 - `states-10m.json` — US state borders
-- `cities-1m.json` — cities over 1M people, labeled once you zoom past a
+- `cities-1m.json` — cities over 1M people, faded in as you zoom past a
   threshold so the world view stays uncluttered
 
 Zoom and pan come from react-simple-maps' own `ZoomableGroup`. (The separate

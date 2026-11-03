@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { animate, motion } from "framer-motion";
+import { memo, useEffect, useRef, useState } from "react";
+import { animate, motion, useReducedMotion } from "framer-motion";
 import {
   ComposableMap,
   Geographies,
@@ -13,13 +13,44 @@ import {
 } from "react-simple-maps";
 import type { TravelLocation } from "@/lib/travel/types";
 import { visitedCountryIds } from "@/lib/travel/locations";
+import {
+  fadeBetween,
+  MIN_ZOOM,
+  planFlight,
+  viewAt,
+  type CameraView,
+} from "@/lib/travel/camera";
 
 const GEO_URL = "/geo/countries-110m.json";
 const US_STATES_URL = "/geo/states-10m.json";
 const CITIES_URL = "/geo/cities-1m.json";
 
-/** Show city name labels once zoomed in past this level (keeps the world view clean). */
-const CITY_LABEL_ZOOM = 4;
+/** City dots and labels fade in between these zoom levels, so they don't pop
+ *  in mid-flight (and the world view stays clean). */
+const CITY_FADE_START = 3.5;
+const CITY_FADE_END = 4.5;
+
+const MAX_ZOOM = 12;
+
+// Map pins are bare footprints (the page is "Footprints"): a right foot, heel
+// down and toes up, centred on the place. Drawn small and scaled by
+// FOOTPRINT_SCALE; tilted a little so it reads as a step, not a symbol.
+const FOOTPRINT_SOLE =
+  "M-1.8 7.8 C-3.9 7.8 -4.4 5.6 -4.1 3.4 C-3.8 1.4 -4.5 -0.6 -4.3 -2.6 " +
+  "C-4.1 -5.2 -2.3 -6.4 0 -6.4 C2.4 -6.4 4.1 -5 3.9 -2.8 " +
+  "C3.7 -0.6 2.3 1.2 1.9 3.4 C1.5 5.8 0.4 7.8 -1.8 7.8 Z";
+/** Toes from big to little: [cx, cy, r]. */
+const FOOTPRINT_TOES: [number, number, number][] = [
+  [-2.5, -8.6, 1.6],
+  [0.2, -9.3, 1],
+  [1.9, -8.8, 0.9],
+  [3.3, -7.8, 0.8],
+  [4.3, -6.4, 0.7],
+];
+const FOOTPRINT_SCALE = 1.2;
+const FOOTPRINT_TILT = -8;
+/** The camera eases in and out of every flight. */
+const FLIGHT_EASE = "easeInOut";
 
 interface City {
   name: string;
@@ -30,6 +61,15 @@ interface City {
 /** Zoomed-out default view */
 const DEFAULT_CENTER: [number, number] = [0, 20];
 const DEFAULT_ZOOM = 1;
+const DEFAULT_VIEW: CameraView = {
+  coordinates: DEFAULT_CENTER,
+  zoom: DEFAULT_ZOOM,
+};
+
+const sameView = (a: CameraView, b: CameraView) =>
+  a.zoom === b.zoom &&
+  a.coordinates[0] === b.coordinates[0] &&
+  a.coordinates[1] === b.coordinates[1];
 
 /**
  * Tracks whether the dark theme is active by watching the `.dark` class on
@@ -112,31 +152,109 @@ const DARK_PALETTE: MapPalette = {
   tooltipText: "#0a0a0a",
 };
 
+/*
+ * The country and US-state layers are hundreds of SVG paths. They're memoized
+ * on the palette alone (country hover lives inside the layer), so the camera's
+ * per-frame updates during a flight only re-render the pins and cities, not the
+ * whole world. ZoomableGroup moves them with a single transform on their parent
+ * <g>, and react-simple-maps' map context is memoized, so nothing else forces a
+ * re-render.
+ */
+const CountriesLayer = memo(function CountriesLayer({
+  palette,
+}: {
+  palette: MapPalette;
+}) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  return (
+    <Geographies geography={GEO_URL}>
+      {({ geographies }) =>
+        geographies.map((geo) => {
+          const id = String(geo.id);
+          const visited = visitedCountryIds.has(id);
+          const isHovered = hoveredId === id;
+          const fill = visited
+            ? isHovered
+              ? palette.visitedHover
+              : palette.visited
+            : isHovered
+              ? palette.landHover
+              : palette.land;
+          return (
+            <Geography
+              key={geo.rsmKey}
+              geography={geo}
+              onMouseEnter={() => setHoveredId(id)}
+              onMouseLeave={() => setHoveredId(null)}
+              fill={fill}
+              stroke={visited ? palette.visitedStroke : palette.landStroke}
+              strokeWidth={visited ? 0.7 : 0.4}
+              // Decorative: VoiceOver otherwise announces every country path
+              // as "graphic symbol".
+              aria-hidden="true"
+              focusable="false"
+              tabIndex={-1}
+              style={{ outline: "none", transition: "fill 0.2s ease" }}
+            />
+          );
+        })
+      }
+    </Geographies>
+  );
+});
+
+/** US state borders: transparent fill, thin stroke, drawn on top of the
+ *  country fills. Only noticeable when zoomed into the US. */
+const StatesLayer = memo(function StatesLayer({
+  palette,
+}: {
+  palette: MapPalette;
+}) {
+  return (
+    <Geographies geography={US_STATES_URL}>
+      {({ geographies }) =>
+        geographies.map((geo) => (
+          <Geography
+            key={geo.rsmKey}
+            geography={geo}
+            fill="transparent"
+            stroke={palette.stateLine}
+            strokeWidth={0.3}
+            aria-hidden="true"
+            focusable="false"
+            tabIndex={-1}
+            style={{ outline: "none", pointerEvents: "none" }}
+          />
+        ))
+      }
+    </Geographies>
+  );
+});
+
 interface WorldMapProps {
   locations: TravelLocation[];
   selected: TravelLocation | null;
   onSelect: (location: TravelLocation) => void;
-}
-
-interface View {
-  coordinates: [number, number];
-  zoom: number;
+  /**
+   * Fired once the camera settles on a newly selected place (immediately under
+   * reduced motion). Not fired on reset. The travel page starts the photo
+   * hand-off from here.
+   */
+  onFlightComplete?: (location: TravelLocation) => void;
 }
 
 export default function WorldMap({
   locations,
   selected,
   onSelect,
+  onFlightComplete,
 }: WorldMapProps) {
-  const [view, setView] = useState<View>({
-    coordinates: DEFAULT_CENTER,
-    zoom: DEFAULT_ZOOM,
-  });
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [view, setView] = useState<CameraView>(DEFAULT_VIEW);
   const [hoveredPinId, setHoveredPinId] = useState<string | null>(null);
   const [cities, setCities] = useState<City[]>([]);
   // Gate the pin drop-in until after mount so SSR and first client render agree.
   const [mounted, setMounted] = useState(false);
+  const reduceMotion = useReducedMotion();
   const palette = useIsDark() ? DARK_PALETTE : LIGHT_PALETTE;
 
   useEffect(() => {
@@ -157,31 +275,67 @@ export default function WorldMap({
     };
   }, []);
 
-  const targetLng = selected ? selected.coordinates[0] : DEFAULT_CENTER[0];
-  const targetLat = selected ? selected.coordinates[1] : DEFAULT_CENTER[1];
-  const targetZoom = selected ? selected.zoom : DEFAULT_ZOOM;
-
+  // The camera as of the last frame, so a new flight (or an interruption)
+  // starts exactly where the map is. Written only from effects and animation
+  // callbacks, never during render.
+  const viewRef = useRef<CameraView>(DEFAULT_VIEW);
+  // The place whose arrival was already reported, so re-running the effect
+  // for the same selection (e.g. the reduced-motion setting changing) doesn't
+  // start the photo hand-off twice.
+  const completedIdRef = useRef<string | null>(null);
+  const onFlightCompleteRef = useRef(onFlightComplete);
   useEffect(() => {
-    const fromLng = view.coordinates[0];
-    const fromLat = view.coordinates[1];
-    const fromZoom = view.zoom;
+    onFlightCompleteRef.current = onFlightComplete;
+  }, [onFlightComplete]);
 
+  const selectedId = selected?.id ?? null;
+
+  /*
+   * One continuous fly-to per selection: the centre glides across the map, the
+   * zoom moves in log space and pulls out mid-flight on long hops, and the
+   * whole thing eases in and out over 0.9–1.6s depending on distance (see
+   * lib/travel/camera.ts). A new selection mid-flight stops this one and starts
+   * from the current frame, so nothing jumps. Reset flies back the same way.
+   */
+  useEffect(() => {
+    const target = selected;
+    const to: CameraView = target
+      ? { coordinates: target.coordinates, zoom: target.zoom }
+      : DEFAULT_VIEW;
+    const from = viewRef.current;
+
+    if (target?.id !== completedIdRef.current) completedIdRef.current = null;
+    const apply = (next: CameraView) => {
+      viewRef.current = next;
+      setView(next);
+    };
+    const arrive = () => {
+      apply(to);
+      if (target && completedIdRef.current !== target.id) {
+        completedIdRef.current = target.id;
+        onFlightCompleteRef.current?.(target);
+      }
+    };
+
+    // Reduced motion: jump straight there. Already there: nothing to animate.
+    if (reduceMotion || sameView(from, to)) {
+      arrive();
+      return;
+    }
+
+    const { duration, dip } = planFlight(from, to);
     const controls = animate(0, 1, {
-      duration: 0.8,
-      ease: [0.22, 1, 0.36, 1],
-      onUpdate: (t) => {
-        setView({
-          coordinates: [
-            fromLng + (targetLng - fromLng) * t,
-            fromLat + (targetLat - fromLat) * t,
-          ],
-          zoom: fromZoom + (targetZoom - fromZoom) * t,
-        });
-      },
+      duration,
+      ease: FLIGHT_EASE,
+      onUpdate: (t) => apply(viewAt(from, to, dip, t)),
+      onComplete: arrive,
     });
     return () => controls.stop();
+    // Keyed on the selection's id; `selected` is derived from it.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetLng, targetLat, targetZoom]);
+  }, [selectedId, reduceMotion]);
+
+  const cityOpacity = fadeBetween(view.zoom, CITY_FADE_START, CITY_FADE_END);
 
   // The map's SVG projection can differ subtly between server and client, which
   // trips hydration. Render a matching placeholder until mounted.
@@ -227,8 +381,8 @@ export default function WorldMap({
         <ZoomableGroup
           center={view.coordinates}
           zoom={view.zoom}
-          minZoom={1}
-          maxZoom={12}
+          minZoom={MIN_ZOOM}
+          maxZoom={MAX_ZOOM}
         >
           <Sphere
             id="ocean-sphere"
@@ -245,95 +399,43 @@ export default function WorldMap({
             focusable="false"
           />
 
-          <Geographies geography={GEO_URL}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
-                const id = String(geo.id);
-                const visited = visitedCountryIds.has(id);
-                const isHovered = hoveredId === id;
-                const fill = visited
-                  ? isHovered
-                    ? palette.visitedHover
-                    : palette.visited
-                  : isHovered
-                    ? palette.landHover
-                    : palette.land;
+          <CountriesLayer palette={palette} />
+          <StatesLayer palette={palette} />
+
+          {/* Major cities (pop >= 1M): hidden at the world view and faded in
+              as the camera zooms past CITY_FADE_START, so they act as context
+              rather than clutter and never pop in mid-flight. pointer-events
+              off so they never intercept travel-pin clicks. */}
+          {cityOpacity > 0 && (
+            <g opacity={cityOpacity} pointerEvents="none">
+              {cities.map((city) => {
+                const s = 1 / view.zoom;
                 return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    onMouseEnter={() => setHoveredId(id)}
-                    onMouseLeave={() => setHoveredId(null)}
-                    fill={fill}
-                    stroke={
-                      visited ? palette.visitedStroke : palette.landStroke
-                    }
-                    strokeWidth={visited ? 0.7 : 0.4}
-                    // Decorative: VoiceOver otherwise announces every country
-                    // path as "graphic symbol".
+                  <Marker
+                    key={`city-${city.name}-${city.coordinates[0]}`}
+                    coordinates={city.coordinates}
                     aria-hidden="true"
                     focusable="false"
                     tabIndex={-1}
-                    style={{ outline: "none", transition: "fill 0.2s ease" }}
-                  />
+                    style={{ pointerEvents: "none" }}
+                  >
+                    <g transform={`scale(${s})`} pointerEvents="none">
+                      <circle r={1.6} fill={palette.cityDot} opacity={0.55} />
+                      <text
+                        x={3}
+                        y={2.5}
+                        fontSize={7}
+                        fill={palette.cityDot}
+                        opacity={0.8}
+                      >
+                        {city.name}
+                      </text>
+                    </g>
+                  </Marker>
                 );
-              })
-            }
-          </Geographies>
-
-          {/* US state borders — transparent fill, thin stroke, drawn on top of
-              the country fills. Only visible when zoomed into the US. */}
-          <Geographies geography={US_STATES_URL}>
-            {({ geographies }) =>
-              geographies.map((geo) => (
-                <Geography
-                  key={geo.rsmKey}
-                  geography={geo}
-                  fill="transparent"
-                  stroke={palette.stateLine}
-                  strokeWidth={0.3}
-                  aria-hidden="true"
-                  focusable="false"
-                  tabIndex={-1}
-                  style={{
-                    outline: "none",
-                    pointerEvents: "none",
-                  }}
-                />
-              ))
-            }
-          </Geographies>
-
-          {/* Major cities (pop >= 1M): hidden at the world view, revealed (dot +
-              label) once zoomed in, so they act as context rather than clutter.
-              pointer-events off so they never intercept travel-pin clicks. */}
-          {view.zoom >= CITY_LABEL_ZOOM &&
-            cities.map((city) => {
-              const s = 1 / view.zoom;
-              return (
-                <Marker
-                  key={`city-${city.name}-${city.coordinates[0]}`}
-                  coordinates={city.coordinates}
-                  aria-hidden="true"
-                  focusable="false"
-                  tabIndex={-1}
-                  style={{ pointerEvents: "none" }}
-                >
-                  <g transform={`scale(${s})`} pointerEvents="none">
-                    <circle r={1.6} fill={palette.cityDot} opacity={0.55} />
-                    <text
-                      x={3}
-                      y={2.5}
-                      fontSize={7}
-                      fill={palette.cityDot}
-                      opacity={0.8}
-                    >
-                      {city.name}
-                    </text>
-                  </g>
-                </Marker>
-              );
-            })}
+              })}
+            </g>
+          )}
 
           {locations.map((location, index) => {
             const isSelected = selected?.id === location.id;
@@ -356,48 +458,59 @@ export default function WorldMap({
                 // instead of a focus ring.
                 style={{ cursor: "pointer", outline: "none" }}
               >
+                {/* Pins drop in one after another, except under reduced
+                    motion, where they're simply there. */}
                 <motion.g
-                  initial={{ opacity: 0, y: -18 }}
+                  initial={reduceMotion ? false : { opacity: 0, y: -18 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 220,
-                    damping: 20,
-                    delay: index * 0.12,
-                  }}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : {
+                          type: "spring",
+                          stiffness: 220,
+                          damping: 20,
+                          delay: index * 0.12,
+                        }
+                  }
                 >
                   <g transform={`scale(${scale})`}>
-                    {/* Google-style teardrop pin, drawn as SVG so it renders
-                        identically on every browser (unlike the 📍 emoji).
-                        The path's tip is at (0,0), so it plants on the point.
-                        Scaled up a touch when selected. */}
-                    {/* Selection is shown by scaling the pin up — the only cue
-                        now that there's no focus ring. Hover gets a smaller
-                        bump so the map still feels responsive. */}
+                    {/* Footprint pin, drawn as SVG so it renders identically on
+                        every browser, centred on the place. Selection is shown
+                        by scaling it up, the only cue now that there's no
+                        focus ring. Hover gets a smaller bump so the map still
+                        feels responsive. */}
+                    {/* data-pin-id lets the photo hand-off find this pin's
+                        on-screen position. It's on the pin shape alone, so the
+                        hover tooltip never changes the measured box. */}
                     <g
+                      data-pin-id={location.id}
                       transform={`scale(${
                         isSelected ? 2 : hoveredPinId === location.id ? 1.5 : 1
                       })`}
                       style={{ transition: "transform 0.2s ease" }}
                     >
-                      {/* soft shadow under the tip */}
-                      <ellipse
-                        cx={0}
-                        cy={0}
-                        rx={2.2}
-                        ry={0.8}
-                        fill="#000"
-                        opacity={0.2}
-                      />
-                      {/* teardrop body: rounded top tapering to a point at (0,0) */}
-                      <path
-                        d="M0 0 C -4.2 -6, -6 -8.6, -6 -12 A 6 6 0 1 1 6 -12 C 6 -8.6, 4.2 -6, 0 0 Z"
+                      <g
+                        transform={`rotate(${FOOTPRINT_TILT}) scale(${FOOTPRINT_SCALE})`}
                         fill={isSelected ? palette.pinSelected : palette.pin}
                         stroke="#ffffff"
-                        strokeWidth={1.2}
-                      />
-                      {/* inner hole */}
-                      <circle cx={0} cy={-12} r={2.2} fill="#ffffff" />
+                        strokeWidth={1}
+                      >
+                        {/* Invisible hit area over the whole foot, so the gaps
+                            between the toes still take the click. */}
+                        <ellipse
+                          cx={0}
+                          cy={-1}
+                          rx={5.5}
+                          ry={10.5}
+                          fill="transparent"
+                          stroke="none"
+                        />
+                        <path d={FOOTPRINT_SOLE} />
+                        {FOOTPRINT_TOES.map(([cx, cy, r]) => (
+                          <circle key={`${cx},${cy}`} cx={cx} cy={cy} r={r} />
+                        ))}
+                      </g>
                     </g>
 
                     {hoveredPinId === location.id &&
@@ -405,7 +518,8 @@ export default function WorldMap({
                         const label = location.name;
                         const w = label.length * 6.5 + 14;
                         return (
-                          <g transform="translate(0, -20)" pointerEvents="none">
+                          // Clears the hovered (1.5×) footprint's toes.
+                          <g transform="translate(0, -23)" pointerEvents="none">
                             <rect
                               x={-w / 2}
                               y={-19}

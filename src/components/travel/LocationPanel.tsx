@@ -5,7 +5,7 @@ import Image from "next/image";
 import type { TravelLocation } from "@/lib/travel/types";
 import { formatTravelDate } from "@/lib/travel/dates";
 import { cloudinaryLoader } from "@/lib/travel/cloudinary-loader";
-import { frameFor, type Frame } from "@/lib/travel/masonry";
+import { frameFor, frameSizes, type Frame } from "@/lib/travel/masonry";
 import Lightbox from "./Lightbox";
 
 interface LocationPanelProps {
@@ -113,7 +113,12 @@ export default function LocationPanel({
           {location.photos.map((photo, i) => {
             const frame = frameFor(i, location.photos.length);
             return (
-              <li key={photo.id} className={frameClass(frame)}>
+              <li
+                key={photo.id}
+                className={frameClass(frame)}
+                // Lets the photo hand-off land exactly on tile 0.
+                data-photo-index={i}
+              >
                 <button
                   type="button"
                   onClick={() => setLightboxIndex(i)}
@@ -131,11 +136,7 @@ export default function LocationPanel({
                     loader={cloudinaryLoader}
                     alt={`${location.name} — ${photo.label}`}
                     fill
-                    sizes={
-                      frame.wide
-                        ? "(min-width: 1024px) 60vw, 100vw"
-                        : "(min-width: 640px) 30vw, 50vw"
-                    }
+                    sizes={frameSizes(frame)}
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                   />
                   {/* Hard-edged figure label, revealed on hover/focus. */}
