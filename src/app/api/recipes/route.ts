@@ -1,26 +1,27 @@
 import { clientKey, createRateLimiter } from "@/lib/cooking/rate-limit";
+import { getCatalog } from "@/lib/cooking/server/catalog";
 import { searchRecipes } from "@/lib/cooking/server/recipe-search";
-import {
-  theMealDbProvider,
-  UpstreamError,
-} from "@/lib/cooking/server/themealdb";
 import { parseSearchParams } from "@/lib/cooking/validation";
 
 /**
- * GET /api/recipes?ingredients=a,b,c&diet=vegan,gluten-free&staples=1
+ * GET /api/recipes?ingredients=a,b,c&diet=vegan,gluten-free
+ *
+ * Scores the build-time recipe catalog locally; never calls TheMealDB.
  *
  * 200 RecipeSearchResponse | 400 invalid input | 429 rate limited |
- * 502 recipe provider unavailable. Error bodies are `{ error, retryable }` and
- * never include stack traces or upstream details.
+ * 503 no catalog in this build. Error bodies are `{ error, retryable }` and
+ * never include stack traces or internal details.
  */
 
+// Searches are cheap (in-memory scoring) and toggling a diet filter re-runs
+// one, so 30 a minute per client leaves plenty of room. In-memory and per
+// instance: a runaway-loop guard, not a strict global limit (see rate-limit.ts).
 const limiter = createRateLimiter({ limit: 30, windowMs: 60_000 });
 
 const json = (body: unknown, status = 200) =>
   Response.json(body, {
     status,
     // Responses reflect the user's pantry; don't let shared caches keep them.
-    // Upstream recipe data is cached separately inside the provider adapter.
     headers: { "Cache-Control": "no-store" },
   });
 
@@ -36,15 +37,18 @@ export async function GET(request: Request) {
   if (!parsed.ok) return json({ error: parsed.error, retryable: false }, 400);
 
   try {
-    return json(await searchRecipes(parsed.value, theMealDbProvider));
-  } catch (err) {
-    if (err instanceof UpstreamError) {
-      const message =
-        err.kind === "rate-limited"
-          ? "The recipe service is busy right now. Please try again shortly."
-          : "We couldn't reach the recipe service. Please try again.";
-      return json({ error: message, retryable: true }, 502);
+    const catalog = await getCatalog();
+    if (!catalog.available) {
+      return json(
+        {
+          error: "Recipe data isn't available in this build.",
+          retryable: false,
+        },
+        503,
+      );
     }
+    return json(searchRecipes(parsed.value, catalog));
+  } catch {
     return json(
       { error: "Something went wrong. Please try again.", retryable: true },
       500,

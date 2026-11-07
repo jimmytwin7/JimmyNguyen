@@ -4,13 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowDown } from "lucide-react";
 import { MAX_PANTRY_INGREDIENTS } from "@/lib/cooking/config";
-import { passesDietaryFilters } from "@/lib/cooking/dietary-filter";
 import { normalizeIngredient } from "@/lib/cooking/ingredient-normalizer";
-import {
-  scoreRecipe,
-  sortMatches,
-  type SortOrder,
-} from "@/lib/cooking/recipe-matcher";
+import type { SortOrder } from "@/lib/cooking/recipe-matcher";
 import type {
   DietaryFilter,
   PantryIngredient,
@@ -34,6 +29,8 @@ const MAX_FLIGHTS = 8;
 const FLIGHT_TIMEOUT_MS = 2000;
 /** Height of the site's sticky nav (4rem). */
 const HEADER_OFFSET_PX = 64;
+/** Wait for a pause in diet-filter toggling before re-searching. */
+const DIET_DEBOUNCE_MS = 250;
 
 /** Center of a rect, or null if it's outside the viewport. */
 function visibleCenter(el: Element | null) {
@@ -46,6 +43,16 @@ function visibleCenter(el: Element | null) {
   return onScreen ? { x, y } : null;
 }
 
+/** A failed search, with whether retrying could help. */
+class SearchError extends Error {
+  constructor(
+    message: string,
+    readonly retryable: boolean,
+  ) {
+    super(message);
+  }
+}
+
 type View =
   | { kind: "search" }
   | { kind: "detail"; id: string }
@@ -54,18 +61,29 @@ type View =
 /**
  * Route-level composition and state for the cooking project.
  *
- * The server returns scored recipes for the pantry at search time. Dietary
- * filters, the staples toggle, and sorting then apply live on the client using
- * the same pure functions, so changing them doesn't refetch and the numbers
- * always agree with the server's.
+ * The server scores its whole recipe catalog against the board (pantry
+ * staples always assumed) and applies dietary filters before picking the top
+ * results, so changing a filter re-runs the search (debounced). The client
+ * only re-sorts the results after the best match; it never re-scores or
+ * re-filters.
  */
-export default function PantryQuest() {
+export default function PantryQuest({
+  suggestions = [],
+}: {
+  /**
+   * Autocomplete names, most-used first. The /cooking page builds these from
+   * the recipe catalog; empty means no autocomplete.
+   */
+  suggestions?: string[];
+} = {}) {
   const [pantry, setPantry] = useState<PantryIngredient[]>([]);
   const [diet, setDiet] = useState<DietaryFilter[]>([]);
-  const [assumeStaples, setAssumeStaples] = useState(true);
-  const [sort, setSort] = useState<SortOrder>("match");
+  const [sort, setSort] = useState<SortOrder>("best");
   const [status, setStatus] = useState<SearchStatus>("idle");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{
+    message: string;
+    retryable: boolean;
+  } | null>(null);
   const [data, setData] = useState<RecipeSearchResponse | null>(null);
   /** Pantry snapshot the current results were fetched for. */
   const [searchedPantry, setSearchedPantry] = useState<PantryIngredient[]>([]);
@@ -75,6 +93,8 @@ export default function PantryQuest() {
   /** A search just settled; reveal the results once the hop finishes. */
   const [revealPending, setRevealPending] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  /** Board sent with the latest search; diet changes re-run it. */
+  const lastQueryRef = useRef<PantryIngredient[] | null>(null);
   const resultsAnchorRef = useRef<HTMLDivElement>(null);
   const potMouthRef = useRef<HTMLSpanElement>(null);
   const reduceMotion = useReducedMotion();
@@ -135,46 +155,75 @@ export default function PantryQuest() {
     setFlights(next);
   }
 
-  async function search(items: PantryIngredient[] = pantry) {
+  /**
+   * Run a search. `quiet` (used when a diet filter changes) skips the pot
+   * animation and doesn't scroll or move focus, so toggling filters with the
+   * keyboard keeps focus on the filter.
+   */
+  async function search(
+    items: PantryIngredient[] = pantry,
+    { quiet = false }: { quiet?: boolean } = {},
+  ) {
     if (items.length === 0) return;
-    launchFlights();
+    if (!quiet) launchFlights();
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    lastQueryRef.current = items;
 
     setStatus("loading");
     setError(null);
     setAnnouncement("Searching for recipes…");
     const params = new URLSearchParams({
       ingredients: items.map((p) => p.name).join(","),
-      staples: assumeStaples ? "1" : "0",
     });
+    if (diet.length > 0) params.set("diet", diet.join(","));
     try {
       const res = await fetch(`/api/recipes?${params}`, {
         signal: controller.signal,
       });
       const body = (await res.json().catch(() => null)) as
-        RecipeSearchResponse | { error?: string } | null;
+        RecipeSearchResponse | { error?: string; retryable?: boolean } | null;
       if (!res.ok || !body || !("matches" in body)) {
-        throw new Error(
-          (body && "error" in body && body.error) ||
-            "We couldn't load recipes. Please try again.",
+        const failure = body && "error" in body ? body : null;
+        throw new SearchError(
+          failure?.error || "We couldn't load recipes. Please try again.",
+          failure?.retryable !== false,
         );
       }
       setData(body);
       setSearchedPantry(items);
       setStatus("success");
-      setAnnouncement(`Found ${body.matches.length} recipes.`);
+      setAnnouncement(
+        `Found ${body.matches.length} ${body.matches.length === 1 ? "recipe" : "recipes"}.`,
+      );
     } catch (err) {
       if (controller.signal.aborted) return;
       const message =
         err instanceof Error ? err.message : "Something went wrong.";
-      setError(message);
+      setError({
+        message,
+        retryable: err instanceof SearchError ? err.retryable : true,
+      });
       setStatus("error");
       setAnnouncement(message);
     }
-    setRevealPending(true);
+    if (!quiet) setRevealPending(true);
   }
+
+  // Diet filters are applied on the server before the top results are picked,
+  // so a change re-runs the latest search once toggling pauses. The new search
+  // aborts any in-flight one.
+  useEffect(() => {
+    const items = lastQueryRef.current;
+    if (!items) return;
+    const t = setTimeout(
+      () => search(items, { quiet: true }),
+      DIET_DEBOUNCE_MS,
+    );
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when the filters change
+  }, [diet]);
 
   /**
    * Bring the results into view and move focus to their heading. Skips the
@@ -215,23 +264,7 @@ export default function PantryQuest() {
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
-  // Live re-score / filter / sort with the same pure functions as the server.
-  const allMatches = useMemo(
-    () =>
-      (data?.matches ?? []).map((m) =>
-        scoreRecipe(m.recipe, searchedPantry, { assumeStaples }),
-      ),
-    [data, searchedPantry, assumeStaples],
-  );
-  const visible = useMemo(
-    () =>
-      sortMatches(
-        allMatches.filter((m) => passesDietaryFilters(m.recipe, diet)),
-        sort,
-      ),
-    [allMatches, diet, sort],
-  );
-  const hiddenCount = allMatches.length - visible.length;
+  const matches = data?.matches ?? [];
 
   const pantryChanged =
     status === "success" &&
@@ -242,7 +275,7 @@ export default function PantryQuest() {
 
   const selected =
     view.kind !== "search"
-      ? allMatches.find((m) => m.recipe.id === view.id)
+      ? matches.find((m) => m.recipe.id === view.id)
       : undefined;
 
   function backToResults() {
@@ -261,9 +294,11 @@ export default function PantryQuest() {
       : status === "error"
         ? "The recipe book is stuck. Give it another try?"
         : status === "success" && !pantryChanged
-          ? visible.length > 0
-            ? `Found ${visible.length} ${visible.length === 1 ? "recipe" : "recipes"}. Pick one and start cooking.`
-            : "No match this time. Try adding a common ingredient."
+          ? matches.length > 0
+            ? `Found ${matches.length} ${matches.length === 1 ? "recipe" : "recipes"}. Pick one and start cooking.`
+            : (data?.meta.filteredOutCount ?? 0) > 0
+              ? "No recipes fit your dietary filters. Try loosening them."
+              : "No match this time. Try adding a common ingredient."
           : pantry.length === 0
             ? "Put what's in your kitchen on the board to start."
             : `${pantry.length} ${pantry.length === 1 ? "ingredient" : "ingredients"} ready. Hit Find my recipe when you're set.`;
@@ -377,6 +412,7 @@ export default function PantryQuest() {
           }
         >
           <IngredientInput
+            suggestions={suggestions}
             existing={existing}
             onAdd={addIngredient}
             count={pantry.length}
@@ -399,8 +435,8 @@ export default function PantryQuest() {
               >
                 {status === "error"
                   ? "Order problem: see why"
-                  : visible.length > 0
-                    ? `Order up! ${visible.length} ${visible.length === 1 ? "recipe" : "recipes"}`
+                  : matches.length > 0
+                    ? `Order up! ${matches.length} ${matches.length === 1 ? "recipe" : "recipes"}`
                     : "Order up: see results"}
                 <ArrowDown
                   className="h-4 w-4"
@@ -416,12 +452,7 @@ export default function PantryQuest() {
               <p className="text-center text-lg font-bold uppercase tracking-wider">
                 Order ticket
               </p>
-              <DietaryFilters
-                selected={diet}
-                onChange={setDiet}
-                assumeStaples={assumeStaples}
-                onAssumeStaplesChange={setAssumeStaples}
-              />
+              <DietaryFilters selected={diet} onChange={setDiet} />
             </div>
           </aside>
         </div>
@@ -429,20 +460,26 @@ export default function PantryQuest() {
 
       <div ref={resultsAnchorRef} className="scroll-mt-24">
         <RecipeResults
+          board={searchedPantry}
           status={status}
-          error={error}
-          matches={visible}
-          hiddenCount={hiddenCount}
+          error={error?.message ?? null}
+          retryable={error?.retryable ?? true}
+          matches={matches}
+          filteredOutCount={data?.meta.filteredOutCount ?? 0}
+          recipeCount={data?.meta.recipeCount ?? 0}
           sort={sort}
           onSortChange={setSort}
           onRetry={() => search()}
-          onClearFilters={() => setDiet([])}
+          onClearFilters={() => {
+            setDiet([]);
+            // The button disappears while the search re-runs; keep focus in
+            // the results instead of dropping it to the page.
+            document.getElementById("results-heading")?.focus();
+          }}
           onOpen={(id) => {
             setView({ kind: "detail", id });
             window.scrollTo({ top: 0 });
           }}
-          queriedIngredients={data?.meta.queriedIngredients ?? []}
-          partial={data?.meta.partial ?? false}
         />
       </div>
     </div>

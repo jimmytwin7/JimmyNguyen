@@ -12,6 +12,9 @@
 /build
 
 # misc
+# Scrambl recipe catalog, fetched at build time by
+# scripts/fetch-recipes.mjs. Never committed (TheMealDB data).
+/.data/
 .DS_Store
 *.pem
 

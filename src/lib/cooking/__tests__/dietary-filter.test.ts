@@ -130,3 +130,37 @@ describe("isFoodSafetySensitive", () => {
     expect(isFoodSafetySensitive("butter")).toBe(false);
   });
 });
+
+describe("TheMealDB's “Egg Plants”", () => {
+  it("is eggplant: vegan, and not food-safety-sensitive", () => {
+    expect(textViolatesDiet("Egg Plants", ["vegan"])).toBe(false);
+    expect(
+      passesDietaryFilters(recipe("a", ["Egg Plants", "Rice"]), ["vegan"]),
+    ).toBe(true);
+    expect(isFoodSafetySensitive("Egg Plants")).toBe(false);
+    // Real eggs still count.
+    expect(textViolatesDiet("Eggs", ["vegan"])).toBe(true);
+  });
+});
+
+describe("match-only aliases don't change dietary checks", () => {
+  it("still flags pasta lines for gluten-free, by their own names", () => {
+    for (const name of ["Spaghetti", "Penne Pasta", "Macaroni", "Fettuccine"])
+      expect(textViolatesDiet(name, ["gluten-free"]), name).toBe(true);
+  });
+
+  it("still flags heavy creams for dairy-free and vegan", () => {
+    expect(textViolatesDiet("Double Cream", ["dairy-free"])).toBe(true);
+    expect(textViolatesDiet("Heavy Cream", ["vegan"])).toBe(true);
+  });
+
+  it("still treats white fish as seafood", () => {
+    expect(textViolatesDiet("White Fish", ["vegetarian"])).toBe(true);
+    expect(isFoodSafetySensitive("White Fish")).toBe(true);
+  });
+
+  it("keeps peppers and chillies vegan", () => {
+    expect(textViolatesDiet("Red Pepper", ["vegan"])).toBe(false);
+    expect(textViolatesDiet("Red Chilli", ["vegan"])).toBe(false);
+  });
+});

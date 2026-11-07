@@ -34,6 +34,18 @@ describe("fallbackSubstitutions", () => {
     ).toEqual([]);
     expect(fallbackSubstitutions(["heavy cream"]).suggestions).toHaveLength(1);
   });
+
+  it("looks up the specific name before the generic match key", () => {
+    // Match keys merge tomato purée into tomato paste; the swap must still be
+    // for purée, not "tomato puree, reduced".
+    const [puree] = fallbackSubstitutions(["Tomato Purée"]).suggestions;
+    expect(puree.substitute).toBe("tomato paste thinned with water");
+    const [paste] = fallbackSubstitutions(["tomato paste"]).suggestions;
+    expect(paste.substitute).toBe("tomato puree, reduced");
+    expect(
+      fallbackSubstitutions(["Double Cream"]).suggestions[0].substitute,
+    ).toBe("milk mixed with melted butter");
+  });
 });
 
 describe("getSubstitutions", () => {

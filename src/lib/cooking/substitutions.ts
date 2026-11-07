@@ -1,5 +1,8 @@
 import { isFoodSafetySensitive, textViolatesDiet } from "./dietary-filter";
-import { ingredientMatchKey } from "./ingredient-normalizer";
+import {
+  ingredientMatchKey,
+  normalizeIngredient,
+} from "./ingredient-normalizer";
 import type { DietaryFilter, Substitution } from "./types";
 
 /**
@@ -256,7 +259,14 @@ export function fallbackSubstitutions(
       skipped.push({ ingredient, reason: FOOD_SAFETY_REASON });
       continue;
     }
-    const swaps = FALLBACK[ingredientMatchKey(ingredient)] ?? [];
+    // The specific name first ("heavy cream", "tomato puree"), then the looser
+    // match key ("Garlic Cloves" → "garlic"). Match keys merge some specific
+    // names into generics for matching (heavy cream → cream), and a swap
+    // must be for the ingredient actually missing.
+    const swaps =
+      FALLBACK[normalizeIngredient(ingredient)] ??
+      FALLBACK[ingredientMatchKey(ingredient)] ??
+      [];
     for (const swap of swaps) {
       if (textViolatesDiet(swap.substitute, diet)) continue;
       suggestions.push({ ingredient, ...swap });

@@ -84,6 +84,9 @@ const ASSETS: Record<string, IngredientAsset> = {
   "olive oil": { label: "Olive oil", tint: "#d9f99d" },
   salt: { label: "Salt", tint: "#f1f5f9", file: "salt.png" },
   "black pepper": { label: "Black pepper", tint: "#a8a29e" },
+  // An always-assumed staple; shown in the board's "Pantry basics" strip.
+  // No art in the pack, so it renders the "no art" crate, never the "?" box.
+  water: { label: "Water", tint: "#e0f2fe" },
   chili: { label: "Chili", tint: "#fecaca", file: "chili.png" },
   beef: { label: "Beef", tint: "#fecaca", file: "beef.png" },
   bacon: { label: "Bacon", tint: "#fecdd3", file: "bacon.png" },
@@ -148,43 +151,3 @@ export const SHELF_INGREDIENTS: string[] = [
 
 /** Every ingredient key with an asset entry (tests check each has a file). */
 export const INGREDIENT_ASSET_KEYS: string[] = Object.keys(ASSETS);
-
-/**
- * Autocomplete vocabulary: everything with art, plus common extras that
- * TheMealDB uses as ingredient names. Free text is still allowed.
- */
-export const INGREDIENT_SUGGESTIONS: string[] = Array.from(
-  new Set([
-    ...Object.values(ASSETS).map((a) => a.label.toLowerCase()),
-    "red onion",
-    "lime",
-    "cilantro",
-    "basil",
-    "parsley",
-    "thyme",
-    "chickpeas",
-    "lentils",
-    "zucchini",
-    "eggplant",
-    "cabbage",
-    "pork",
-    "lamb",
-    "salmon",
-    "tuna",
-    "noodles",
-    "yogurt",
-    "cream",
-    "sugar",
-    "vegetable oil",
-    "chicken stock",
-    "vegetable stock",
-    "tomato paste",
-    "cumin",
-    "paprika",
-    "chili powder",
-    "peanut butter",
-    "coconut milk",
-    "spaghetti",
-    "cornstarch",
-  ]),
-).sort();

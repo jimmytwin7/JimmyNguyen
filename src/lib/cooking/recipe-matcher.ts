@@ -7,9 +7,14 @@ import type {
   RecipeMatch,
 } from "./types";
 
-export interface MatchOptions {
-  /** Treat PANTRY_STAPLES (salt, pepper, water) as available. */
-  assumeStaples?: boolean;
+/**
+ * "salt", "salt and olive oil", "salt, olive oil and 2 more": at most `max`
+ * names, so the explanation stays one short line.
+ */
+export function namedList(names: string[], max = 2): string {
+  if (names.length <= 1) return names[0] ?? "";
+  if (names.length <= max) return names.join(" and ");
+  return `${names.slice(0, max).join(", ")} and ${names.length - max} more`;
 }
 
 /**
@@ -29,13 +34,16 @@ export interface MatchOptions {
  *
  *   matchPercentage = round(100 * matched / total)
  *
+ * Pantry staples (PANTRY_STAPLES: salt, pepper, water, cooking oils) are
+ * always assumed available; they count toward the score and are listed in
+ * `assumedIngredients` unless the user put them on the board.
+ *
  * This is *ingredient coverage* — not a prediction of taste or success.
  * Pure function: identical inputs always give identical output.
  */
 export function scoreRecipe(
   recipe: Recipe,
   pantry: PantryIngredient[],
-  options: MatchOptions = {},
 ): RecipeMatch {
   const pantryKeys = new Set(pantry.map((p) => ingredientMatchKey(p.name)));
 
@@ -60,8 +68,7 @@ export function scoreRecipe(
 
   for (const { ingredient, key } of required) {
     if (pantryKeys.has(key)) matchedIngredients.push(ingredient);
-    else if (options.assumeStaples && PANTRY_STAPLES.has(key))
-      assumedIngredients.push(ingredient);
+    else if (PANTRY_STAPLES.has(key)) assumedIngredients.push(ingredient);
     else missingIngredients.push(ingredient);
   }
 
@@ -86,9 +93,7 @@ export function scoreRecipe(
   let score = requiredCoverage;
   if (core.length > 0) {
     const coreHave = core.filter(
-      (u) =>
-        pantryKeys.has(u.key) ||
-        (options.assumeStaples && PANTRY_STAPLES.has(u.key)),
+      (u) => pantryKeys.has(u.key) || PANTRY_STAPLES.has(u.key),
     ).length;
     score = 0.8 * requiredCoverage + 0.2 * (coreHave / core.length);
   }
@@ -97,9 +102,9 @@ export function scoreRecipe(
   const noun = total === 1 ? "ingredient" : "ingredients";
   let scoreExplanation = `You have ${have} of ${total} listed ${noun}`;
   if (assumedIngredients.length > 0) {
-    scoreExplanation += ` (including ${assumedIngredients.length} assumed pantry ${
-      assumedIngredients.length === 1 ? "staple" : "staples"
-    })`;
+    scoreExplanation += ` (${namedList(
+      assumedIngredients.map((i) => i.name.toLowerCase()),
+    )} assumed)`;
   }
   scoreExplanation += ".";
 
@@ -114,25 +119,58 @@ export function scoreRecipe(
   };
 }
 
-export type SortOrder = "match" | "fewest-missing" | "title";
+/**
+ * How many of the user's board items this recipe uses. Staples don't count
+ * (they're assumed for every recipe, so they can't set one apart). Matched
+ * lines are already de-duplicated by match key, so each is one board item.
+ */
+export function boardItemsUsed(match: RecipeMatch): number {
+  return match.matchedIngredients.filter(
+    (i) => !PANTRY_STAPLES.has(ingredientMatchKey(i.name)),
+  ).length;
+}
 
-/** Stable sort of matches. Ties fall back to title, then id. */
+/**
+ * "best": most board items used, then highest match %, then fewest missing,
+ * then title, then id. "percentage": highest match % first. "title": A–Z. Ties
+ * always fall back to title, then id, so every order is total and
+ * deterministic.
+ */
+export type SortOrder = "best" | "percentage" | "title";
+
+function byTitle(a: RecipeMatch, b: RecipeMatch): number {
+  return (
+    a.recipe.title.localeCompare(b.recipe.title) ||
+    a.recipe.id.localeCompare(b.recipe.id)
+  );
+}
+
+/**
+ * The search ranking:
+ * 1. most board items used (a recipe that uses your pasta AND your onion beats
+ *    one that only uses the onion),
+ * 2. highest ingredient match %,
+ * 3. fewest ingredients left to buy,
+ * 4. title, then id.
+ */
+export function compareBestMatch(a: RecipeMatch, b: RecipeMatch): number {
+  return (
+    boardItemsUsed(b) - boardItemsUsed(a) ||
+    b.matchPercentage - a.matchPercentage ||
+    a.missingIngredients.length - b.missingIngredients.length ||
+    byTitle(a, b)
+  );
+}
+
+/** Sorted copy of `matches`; the input is not mutated. */
 export function sortMatches(
   matches: RecipeMatch[],
   order: SortOrder,
 ): RecipeMatch[] {
-  const byTitle = (a: RecipeMatch, b: RecipeMatch) =>
-    a.recipe.title.localeCompare(b.recipe.title) ||
-    a.recipe.id.localeCompare(b.recipe.id);
   return [...matches].sort((a, b) => {
-    if (order === "match")
+    if (order === "best") return compareBestMatch(a, b);
+    if (order === "percentage")
       return b.matchPercentage - a.matchPercentage || byTitle(a, b);
-    if (order === "fewest-missing")
-      return (
-        a.missingIngredients.length - b.missingIngredients.length ||
-        b.matchPercentage - a.matchPercentage ||
-        byTitle(a, b)
-      );
     return byTitle(a, b);
   });
 }

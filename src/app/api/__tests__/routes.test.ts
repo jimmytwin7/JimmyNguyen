@@ -1,63 +1,63 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mealDbMeal } from "@/lib/cooking/__tests__/fixtures";
+import {
+  buildCatalog,
+  UNAVAILABLE_CATALOG,
+  type RecipeCatalog,
+} from "@/lib/cooking/server/catalog";
 import { GET } from "../recipes/route";
 import { POST } from "../substitutions/route";
 
-const RECIPE_KEY = "recipe-secret-key-123";
+// The route reads the build-time catalog through getCatalog(); swap in an
+// in-memory one so these tests never touch the filesystem or the network.
+let catalog: RecipeCatalog;
+vi.mock("@/lib/cooking/server/catalog", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/cooking/server/catalog")>();
+  return { ...actual, getCatalog: async () => catalog };
+});
 
-const meals: Record<string, Record<string, unknown>> = {
-  "11": mealDbMeal("11", "Chicken Rice", [
-    ["Chicken", "1"],
-    ["Rice", "2 cups"],
-    ["Salt", "pinch"],
-  ]),
-  "12": mealDbMeal(
-    "12",
-    "Beef Stew",
-    [
-      ["Beef", "500g"],
-      ["Carrots", "2"],
+const testCatalog = () =>
+  buildCatalog({
+    generatedAt: "2025-01-01T00:00:00.000Z",
+    source: "test-key",
+    meals: [
+      mealDbMeal("11", "Chicken Rice", [
+        ["Chicken", "1"],
+        ["Rice", "2 cups"],
+        ["Salt", "pinch"],
+      ]),
+      mealDbMeal(
+        "12",
+        "Beef Rice",
+        [
+          ["Beef", "500g"],
+          ["Rice", "2 cups"],
+        ],
+        { strCategory: "Beef" },
+      ),
+      mealDbMeal(
+        "13",
+        "Potato Bake",
+        [
+          ["Potatoes", "4"],
+          ["Eggs", "2"],
+        ],
+        { strCategory: "Vegetarian" },
+      ),
     ],
-    { strCategory: "Beef" },
-  ),
-};
+  });
 
-/** Fake TheMealDB provider. Set `mode` to simulate failures. */
-let mode: "ok" | "provider-down" = "ok";
-
-function fakeFetch(input: RequestInfo | URL) {
-  const url = new URL(String(input));
-  if (url.hostname === "www.themealdb.com") {
-    if (mode === "provider-down")
-      return Promise.resolve(new Response("down", { status: 503 }));
-    const i = url.searchParams.get("i") ?? "";
-    if (url.pathname.endsWith("/filter.php")) {
-      const ids =
-        i === "chicken"
-          ? ["11"]
-          : i === "beef"
-            ? ["12"]
-            : i === "rice"
-              ? ["11"]
-              : [];
-      return Promise.resolve(
-        Response.json({
-          meals: ids.length ? ids.map((idMeal) => ({ idMeal })) : null,
-        }),
-      );
-    }
-    if (url.pathname.endsWith("/lookup.php")) {
-      return Promise.resolve(
-        Response.json({ meals: meals[i] ? [meals[i]] : null }),
-      );
-    }
-  }
-  return Promise.reject(new Error(`unexpected fetch ${url}`));
-}
-
+// A fresh client IP per request, so these tests never trip the per-IP limiter
+// (which is module-level and would otherwise couple the tests together).
+let clientCounter = 0;
 const search = (query: string) =>
-  GET(new Request(`http://test/api/recipes?${query}`));
+  GET(
+    new Request(`http://test/api/recipes?${query}`, {
+      headers: { "x-forwarded-for": `10.0.0.${clientCounter++}` },
+    }),
+  );
 const substitutions = (body: unknown, raw?: string) =>
   POST(
     new Request("http://test/api/substitutions", {
@@ -68,59 +68,99 @@ const substitutions = (body: unknown, raw?: string) =>
   );
 
 beforeEach(() => {
-  mode = "ok";
-  vi.stubGlobal("fetch", vi.fn(fakeFetch));
-  vi.stubEnv("RECIPE_API_KEY", RECIPE_KEY);
+  catalog = testCatalog();
+  // Searches must never reach the network.
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(() => Promise.reject(new Error("unexpected fetch"))),
+  );
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  vi.unstubAllEnvs();
 });
 
 describe("GET /api/recipes", () => {
-  it("returns normalized, scored matches", async () => {
-    const res = await search("ingredients=chicken,rice&staples=1");
+  it("scores the catalog locally and returns ranked matches", async () => {
+    const res = await search("ingredients=chicken,rice");
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.matches).toHaveLength(1);
+    expect(
+      body.matches.map((m: { recipe: { id: string } }) => m.recipe.id),
+    ).toEqual(["mealdb-11", "mealdb-12"]);
+    // Salt is assumed, so Chicken Rice is a full match.
     expect(body.matches[0]).toMatchObject({
       matchPercentage: 100,
-      recipe: {
-        id: "mealdb-11",
-        title: "Chicken Rice",
-        sourceName: "TheMealDB",
-      },
+      recipe: { title: "Chicken Rice", sourceName: "TheMealDB" },
     });
-    expect(body.meta.provider).toBe("TheMealDB");
+    expect(body.meta).toEqual({
+      provider: "TheMealDB",
+      recipeCount: 3,
+      candidateCount: 2,
+      filteredOutCount: 0,
+      catalogDate: "2025-01-01T00:00:00.000Z",
+    });
+    expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("uses the configured recipe key server-side but never returns it", async () => {
-    const res = await search("ingredients=chicken");
-    const calledUrl = String(vi.mocked(fetch).mock.calls[0][0]);
-    expect(calledUrl).toContain(`/v1/${RECIPE_KEY}/filter.php`);
-    expect(await res.text()).not.toContain(RECIPE_KEY);
+  it("applies dietary filters on the server", async () => {
+    const res = await search("ingredients=rice,potato&diet=vegetarian");
+    const body = await res.json();
+    expect(
+      body.matches.map((m: { recipe: { id: string } }) => m.recipe.id),
+    ).toEqual(["mealdb-13"]);
+    expect(body.meta.filteredOutCount).toBe(2);
+  });
+
+  it("ignores the removed staples param", async () => {
+    const res = await search("ingredients=chicken,rice&staples=0");
+    const body = await res.json();
+    expect(body.matches[0].matchPercentage).toBe(100);
+    expect(body.matches[0].assumedIngredients).toHaveLength(1);
   });
 
   it("rejects invalid or oversized input", async () => {
     expect((await search("ingredients=")).status).toBe(400);
     expect((await search("ingredients=%3Cscript%3E")).status).toBe(400);
     expect((await search(`ingredients=${"a,".repeat(20)}`)).status).toBe(400);
-    expect((await search("ingredients=rice&diet=keto")).status).toBe(400);
+    const res = await search("ingredients=rice&diet=keto");
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({
+      error: expect.any(String),
+      retryable: false,
+    });
   });
 
-  it("returns a safe 502 when the provider is down", async () => {
-    mode = "provider-down";
+  it("returns a safe 503 when the build has no catalog", async () => {
+    catalog = UNAVAILABLE_CATALOG;
     const res = await search("ingredients=chicken");
-    expect(res.status).toBe(502);
-    const body = await res.json();
-    expect(body).toEqual({ error: expect.any(String), retryable: true });
-    expect(JSON.stringify(body)).not.toMatch(/503|stack|Error:/);
+    expect(res.status).toBe(503);
+    expect(res.headers.get("cache-control")).toBe("no-store");
+    expect(await res.json()).toEqual({
+      error: "Recipe data isn't available in this build.",
+      retryable: false,
+    });
+  });
+
+  it("rate limits a single client at 30 a minute", async () => {
+    const statuses: number[] = [];
+    for (let n = 0; n < 31; n++) {
+      const res = await GET(
+        new Request("http://test/api/recipes?ingredients=chicken", {
+          headers: { "x-forwarded-for": "203.0.113.9" },
+        }),
+      );
+      statuses.push(res.status);
+    }
+    expect(statuses.slice(0, 30).every((s) => s === 200)).toBe(true);
+    expect(statuses[30]).toBe(429);
   });
 
   it("is not cached by shared caches", async () => {
-    const res = await search("ingredients=chicken");
-    expect(res.headers.get("cache-control")).toBe("no-store");
+    for (const query of ["ingredients=chicken", "ingredients="]) {
+      const res = await search(query);
+      expect(res.headers.get("cache-control")).toBe("no-store");
+    }
   });
 });
 

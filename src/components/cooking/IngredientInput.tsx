@@ -3,10 +3,11 @@
 import { useId, useMemo, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import { MAX_PANTRY_INGREDIENTS } from "@/lib/cooking/config";
-import { INGREDIENT_SUGGESTIONS } from "@/lib/cooking/ingredient-assets";
 import { normalizeIngredient } from "@/lib/cooking/ingredient-normalizer";
 
 interface IngredientInputProps {
+  /** Names to suggest, most-used first; order is kept within each group. */
+  suggestions: string[];
   /** Normalized names already on the board (hidden from suggestions). */
   existing: ReadonlySet<string>;
   /** Returns an error message to show, or null on success. */
@@ -22,6 +23,7 @@ const MAX_VISIBLE_SUGGESTIONS = 8;
  * (or the typed text), and Escape closes the list. Free text is allowed.
  */
 export default function IngredientInput({
+  suggestions: vocabulary,
   existing,
   onAdd,
   count,
@@ -39,13 +41,15 @@ export default function IngredientInput({
   const suggestions = useMemo(() => {
     const q = normalizeIngredient(value);
     if (!q) return [];
-    const available = INGREDIENT_SUGGESTIONS.filter(
+    const available = vocabulary.filter(
       (s) => !existing.has(normalizeIngredient(s)),
     );
+    // Names starting with the text first, then names containing it; each
+    // group keeps the list's popularity order.
     const starts = available.filter((s) => s.startsWith(q));
     const contains = available.filter((s) => !s.startsWith(q) && s.includes(q));
     return [...starts, ...contains].slice(0, MAX_VISIBLE_SUGGESTIONS);
-  }, [value, existing]);
+  }, [value, existing, vocabulary]);
 
   const showList = open && suggestions.length > 0;
 

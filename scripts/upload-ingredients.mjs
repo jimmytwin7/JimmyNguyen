@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Uploads the Pantry Quest ingredient icons to Cloudinary.
+ * Uploads the Scrambl ingredient icons to Cloudinary.
  *
  * The licensed pixel-art pack is kept out of the repo (git-ignored). The icons
  * live only on Cloudinary; the app references them by delivery URL from

@@ -6,7 +6,7 @@ import { ingredientIconUrl } from "@/lib/cooking/ingredient-assets";
 /**
  * "Selected projects" — two case-study previews on the home page. Each tile
  * keeps the main portfolio's editorial frame (hairline card, mono metadata)
- * while hinting at the project's own identity: Pantry Quest leans pixel-art +
+ * while hinting at the project's own identity: Scrambl leans pixel-art +
  * warm paper, Travel leans photography-first. The projects' real interfaces
  * live at /cooking and /travel with their own design languages.
  */
@@ -14,7 +14,7 @@ import { ingredientIconUrl } from "@/lib/cooking/ingredient-assets";
 const PANTRY_TAGS = ["Next.js", "API Routes", "TypeScript", "Pixel art"];
 const TRAVEL_TAGS = ["react-simple-maps", "Cloudinary", "SVG / d3-geo"];
 
-/** A few pixel ingredient icons to carry Pantry Quest's identity. */
+/** A few pixel ingredient icons to carry Scrambl's identity. */
 const PREVIEW_ICONS = ["tomato", "egg", "carrot", "cheese", "chili"];
 
 export default function ProjectPreviews() {
@@ -35,11 +35,11 @@ export default function ProjectPreviews() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* ---- Pantry Quest: playful pixel-art cooking game ---- */}
+        {/* ---- Scrambl: playful pixel-art cooking game ---- */}
         <Link
           href="/cooking"
           className="editorial-card group"
-          aria-label="Pantry Quest — open the project"
+          aria-label="Scrambl — open the project"
         >
           {/* Pixel-flavored banner: warm paper wash + ingredient sprites. */}
           <div

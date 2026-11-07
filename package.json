@@ -4,10 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/fetch-recipes.mjs --if-stale",
     "dev": "next dev",
+    "prebuild": "node scripts/fetch-recipes.mjs",
     "build": "next build",
     "start": "next start",
     "refresh:photos": "node scripts/refresh-photos.mjs",
+    "refresh:recipes": "node scripts/fetch-recipes.mjs",
     "upload:ingredients": "node scripts/upload-ingredients.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",

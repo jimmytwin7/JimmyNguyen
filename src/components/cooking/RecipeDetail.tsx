@@ -2,7 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, Check, ChefHat, ExternalLink, Minus } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ChefHat,
+  ExternalLink,
+  Minus,
+  Package,
+} from "lucide-react";
 import { ingredientMatchKey } from "@/lib/cooking/ingredient-normalizer";
 import type {
   DietaryFilter,
@@ -12,6 +19,8 @@ import type {
   SubstitutionResponse,
 } from "@/lib/cooking/types";
 import MatchMeter from "./MatchMeter";
+import Readiness from "./Readiness";
+import { UnusedFromBoard } from "./RecipeCard";
 import {
   SubstitutionControls,
   SubstitutionList,
@@ -134,8 +143,15 @@ export default function RecipeDetail({
               {[recipe.category, recipe.area].filter(Boolean).join(" · ")}
             </p>
           )}
-          <MatchMeter percentage={match.matchPercentage} />
+          <div className="space-y-1.5">
+            <Readiness
+              missingCount={match.missingIngredients.length}
+              className="text-lg"
+            />
+            <MatchMeter percentage={match.matchPercentage} />
+          </div>
           <p className="text-sm text-muted">{match.scoreExplanation}</p>
+          <UnusedFromBoard match={match} board={pantry} />
           <button
             type="button"
             onClick={onStartCooking}
@@ -163,14 +179,25 @@ export default function RecipeDetail({
             const key = ingredientMatchKey(ingredient.name);
             // Never claim the user has something we couldn't classify.
             const status = statusByKey.get(key) ?? "missing";
-            const Icon = status === "missing" ? Minus : Check;
+            // "You have" (you added it) and "assumed" (we gave it to you)
+            // get different icons, plus a chip on assumed lines.
+            const Icon =
+              status === "missing"
+                ? Minus
+                : status === "assumed"
+                  ? Package
+                  : Check;
             return (
               <li key={`${ingredient.name}-${idx}`} className="py-2.5">
                 <div className="flex items-start gap-3">
                   <Icon
-                    className={`mt-0.5 h-4 w-4 shrink-0 ${status === "missing" ? "text-faint" : ""}`}
+                    className={`mt-0.5 h-4 w-4 shrink-0 ${
+                      status === "missing" || status === "assumed"
+                        ? "text-faint"
+                        : ""
+                    }`}
                     style={
-                      status === "missing"
+                      status === "missing" || status === "assumed"
                         ? undefined
                         : { color: "var(--accent)" }
                     }
@@ -184,6 +211,11 @@ export default function RecipeDetail({
                         </span>
                       )}
                       {ingredient.name}
+                      {status === "assumed" && (
+                        <span className="ml-2 inline-block rounded-full border-2 border-[var(--pq-ink)] bg-surface-raised px-2 py-px align-middle text-xs font-bold text-[var(--pq-ink)]">
+                          From your pantry
+                        </span>
+                      )}
                     </p>
                     <p className="text-xs text-muted">{STATUS_LABEL[status]}</p>
                     {showSubs && status === "missing" && (

@@ -16,6 +16,7 @@ const eslintConfig = [
       ".next/**",
       "node_modules/**",
       "next-env.d.ts",
+      ".data/**",
       "src/lib/travel/photos.manifest.json",
       "public/**",
     ],

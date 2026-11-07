@@ -8,16 +8,10 @@ export const MAX_PANTRY_INGREDIENTS = 15;
 export const MAX_INGREDIENT_LENGTH = 40;
 
 /**
- * TheMealDB's free tier only filters by one ingredient per request, so a search
- * fans out to at most this many pantry ingredients, merges the candidates, and
- * scores them locally.
+ * Recipes returned per search: the best match plus up to 11 others,
+ * picked from the whole catalog after dietary filters.
  */
-export const MAX_PROVIDER_QUERIES = 3;
-
-/** Candidate recipes whose full details are fetched and scored per search. */
-export const MAX_DETAIL_LOOKUPS = 12;
-
-export const UPSTREAM_TIMEOUT_MS = 6000;
+export const MAX_RESULTS = 12;
 
 export const DIETARY_FILTERS: { value: DietaryFilter; label: string }[] = [
   { value: "vegetarian", label: "Vegetarian" },
@@ -31,13 +25,27 @@ export const DIETARY_FILTER_VALUES: ReadonlySet<string> = new Set(
 );
 
 /**
- * Pantry staples that may be assumed available when the user opts in. Kept
- * deliberately tiny: things nearly every kitchen has and that rarely define a
- * dish. Expressed as match keys (see ingredient-normalizer.ts).
+ * Pantry staples, always assumed available when scoring. Kept deliberately
+ * small: things nearly every kitchen has and that rarely define a dish.
+ * Flavoring oils (sesame, chilli, truffle) are not staples. Expressed as match
+ * keys (see ingredient-normalizer.ts), so "Extra Virgin Olive Oil" and "Ground
+ * Black Pepper" resolve to "olive oil" and "black pepper".
  */
 export const PANTRY_STAPLES: ReadonlySet<string> = new Set([
   "salt",
+  "sea salt",
+  "kosher salt",
   "pepper",
   "black pepper",
   "water",
+  "cold water",
+  "warm water",
+  "hot water",
+  "boiling water",
+  "oil",
+  "olive oil",
+  "vegetable oil",
+  "sunflower oil",
+  "canola oil",
+  "rapeseed oil",
 ]);

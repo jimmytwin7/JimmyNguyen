@@ -10,8 +10,9 @@ import type { NextConfig } from "next";
  * - `img-src`: Cloudinary (travel photos, ingredient icons) and TheMealDB
  *   (recipe photos), matching next.config's image remotePatterns, plus data:
  *   for inline/blur placeholders.
- * - `connect-src`: TheMealDB is never called from the browser (the API routes
- *   proxy it server-side), but Vercel Analytics beacons to vercel-insights.
+ * - `connect-src`: TheMealDB is never called at runtime (the recipe catalog is
+ *   fetched at build time and scored on the server), but Vercel Analytics
+ *   beacons to vercel-insights.
  * - `font-src 'self'`: next/font self-hosts every font (Figtree, Space Grotesk,
  *   JetBrains Mono, Inter Tight, M PLUS Rounded); no external CDN.
  */
@@ -40,6 +41,12 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Scrambl's recipe catalog is written by scripts/fetch-recipes.mjs
+  // (prebuild) and read with fs at runtime, so tell file tracing to ship it
+  // with the /api/recipes function. It's gitignored and never under public/.
+  outputFileTracingIncludes: {
+    "/api/recipes": ["./.data/recipes.json"],
+  },
   images: {
     // Travel photos are served from Cloudinary, so next/image needs the host
     // allow-listed. The pathname is scoped to this account's cloud name to
@@ -50,7 +57,7 @@ const nextConfig: NextConfig = {
         hostname: "res.cloudinary.com",
         pathname: "/mxlapddp/**",
       },
-      // Pantry Quest recipe photos, scoped to TheMealDB's meal image path.
+      // Scrambl recipe photos, scoped to TheMealDB's meal image path.
       {
         protocol: "https",
         hostname: "www.themealdb.com",

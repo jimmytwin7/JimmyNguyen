@@ -1,5 +1,5 @@
 /**
- * Internal data model for Pantry Quest. Provider responses are normalized into
+ * Internal data model for Scrambl. Provider responses are normalized into
  * these shapes (see recipe-normalizer.ts) so UI components never depend on a
  * specific recipe API's field names.
  */
@@ -53,7 +53,7 @@ export interface RecipeMatch {
   /** 0–100 integer. Ingredient coverage, not a quality prediction. */
   matchPercentage: number;
   matchedIngredients: RecipeIngredient[];
-  /** Matched only because "assume pantry staples" was on. */
+  /** Pantry staples (salt, water, cooking oil…) counted as available. */
   assumedIngredients: RecipeIngredient[];
   missingIngredients: RecipeIngredient[];
   optionalIngredients: RecipeIngredient[];
@@ -61,15 +61,18 @@ export interface RecipeMatch {
 }
 
 export interface RecipeSearchResponse {
+  /** Up to MAX_RESULTS, best first. `matches[0]` is the best match. */
   matches: RecipeMatch[];
   meta: {
     provider: string;
-    /** Pantry ingredients actually sent to the provider (free-tier limit). */
-    queriedIngredients: string[];
+    /** Recipes in the build's catalog (all of them are scored). */
+    recipeCount: number;
+    /** Recipes sharing at least one non-staple ingredient with the board. */
+    candidateCount: number;
     /** Candidates removed by dietary filters. */
     filteredOutCount: number;
-    /** True when some upstream calls failed but others succeeded. */
-    partial: boolean;
+    /** When the catalog was fetched (ISO 8601), if known. */
+    catalogDate: string | null;
   };
 }
 

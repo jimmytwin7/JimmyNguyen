@@ -101,7 +101,7 @@ body {
 }
 
 /* ==========================================================================
- * Pantry Quest (/cooking) — a self-contained "cooking game" world.
+ * Scrambl (/cooking) — a self-contained "cooking game" world.
  *
  * Everything is scoped under .pq-stage. The stage re-defines the site's
  * semantic tokens (--surface, --text, --border, --accent, …) for its subtree,
@@ -263,12 +263,37 @@ body:has(.pq-stage) {
   padding: 0.15rem 0.9rem;
 }
 
+/* Gold ribbon for the best match. #3f2a1e on #f5b301 is ~7:1. */
+.pq-ribbon-gold {
+  background: #f5b301;
+}
+
 /* Paper ticket pinned to the board. */
 .pq-ticket {
   background: var(--pq-paper);
   border: 2px solid var(--pq-ink);
   border-radius: 1.1rem;
   box-shadow: 0 4px 0 var(--pq-ledge);
+}
+
+/* The best match, served: a counter-top panel holding a round plate. */
+.pq-serving {
+  background: var(--pq-paper);
+  border: 3px solid var(--pq-ink);
+  border-radius: 1.75rem;
+  box-shadow:
+    0 6px 0 var(--pq-wood-edge),
+    0 6px 0 3px var(--pq-ink);
+}
+/* The plate: a white rim with an inner ring, so the dish photo sits in it. */
+.pq-plate {
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 3px solid var(--pq-ink);
+  padding: 0.6rem;
+  box-shadow:
+    inset 0 0 0 0.35rem #f3ead8,
+    0 5px 0 var(--pq-ledge);
 }
 .pq-tape {
   position: absolute;
@@ -470,7 +495,7 @@ body:has(.pq-stage) {
  * Editorial layer — the main portfolio's type + primitives.
  *
  * Appended (not merged into the first @theme block) so the existing tokens and
- * the entire Pantry Quest `.pq-stage` / `pq-*` system above stay byte-for-byte
+ * the entire Scrambl `.pq-stage` / `pq-*` system above stay byte-for-byte
  * untouched. Tailwind merges multiple @theme blocks, so these register as real
  * utilities (font-display, font-mono). Everything visual here is opt-in via the
  * `.editorial-*` classes, so nothing leaks into .pq-stage.
@@ -613,7 +638,7 @@ body:has(.pq-stage) {
  * and the site's brand blue as the accent, used boldly (title, thick rules,
  * filled controls, pins). The cool accent on a warm ground is what makes the
  * page pop, and reusing the brand blue ties /travel to the rest of the site.
- * Unlike Pantry Quest it follows the site's dark mode.
+ * Unlike Scrambl it follows the site's dark mode.
  *
  * Accent tokens: --accent is for small accent text and the focus ring;
  * --accent-bold is for large elements and fills; --on-accent is text placed on

@@ -30,6 +30,9 @@ const ALIASES: Record<string, string> = {
   "green bell pepper": "bell pepper",
   "yellow bell pepper": "bell pepper",
   aubergine: "eggplant",
+  // TheMealDB lists "Egg Plants". Without this, the word "egg" would trip the
+  // vegan filter and the food-safety check.
+  "egg plant": "eggplant",
   courgette: "zucchini",
   "coriander leaf": "cilantro",
   "fresh coriander": "cilantro",
@@ -102,6 +105,59 @@ const MATCH_ALIASES: Record<string, string> = {
   "white rice": "rice",
   "cherry tomato": "tomato",
   "plum tomato": "tomato",
+
+  // TheMealDB has no plain "Pasta", only qualified names and shapes, so a
+  // board "pasta" matched nothing. Shapes are interchangeable for our
+  // purposes, so these all resolve to "pasta" (which also means a board
+  // "spaghetti" matches a "Penne Pasta" line). Lasagne sheets are left out:
+  // you can't make lasagne with spaghetti.
+  spaghetti: "pasta",
+  macaroni: "pasta",
+  penne: "pasta",
+  "penne rigate": "pasta",
+  "penne pasta": "pasta",
+  fettuccine: "pasta",
+  farfalle: "pasta",
+  rigatoni: "pasta",
+  linguine: "pasta",
+  "linguine pasta": "pasta",
+  "bowtie pasta": "pasta",
+  "paccheri pasta": "pasta",
+  "vermicelli pasta": "pasta",
+  fusilli: "pasta",
+  tagliatelle: "pasta",
+  pappardelle: "pasta",
+
+  // TheMealDB is UK-heavy: a "red pepper" is a bell pepper, and "bell pepper"
+  // itself appears in no recipe. Hot peppers ("cayenne pepper", "red pepper
+  // flakes") keep their own keys.
+  "red pepper": "bell pepper",
+  "green pepper": "bell pepper",
+  "yellow pepper": "bell pepper",
+
+  // UK spelling: "chilli" (12 recipes, plus 51 "red" and 21 "green"); "chili"
+  // appears in none. Chilli powder, flakes and sauces keep their own keys.
+  chilli: "chili",
+  "red chilli": "chili",
+  "green chilli": "chili",
+
+  // Sweetcorn is corn; "corn" alone appears in no recipe. Cornmeal, corn
+  // flour and creamed corn stay separate.
+  sweetcorn: "corn",
+  "sweet corn": "corn",
+  "corn on the cob": "corn",
+
+  // UK "tomato purée" is US "tomato paste" (53 recipes vs 0).
+  "tomato puree": "tomato paste",
+
+  // Heavy creams are interchangeable. Sour cream, cream cheese, coconut cream
+  // and single cream stay separate.
+  "double cream": "cream",
+  "heavy cream": "cream",
+  "whipping cream": "cream",
+
+  "white fish": "fish",
+  "brown lentil": "lentil",
 };
 
 /** Singularize a single word with a few safe rules. */

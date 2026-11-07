@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { SortOrder } from "@/lib/cooking/recipe-matcher";
-import type { RecipeMatch } from "@/lib/cooking/types";
+import { sortMatches, type SortOrder } from "@/lib/cooking/recipe-matcher";
+import type { PantryIngredient, RecipeMatch } from "@/lib/cooking/types";
+import BestMatchPlate from "./BestMatchPlate";
 import RecipeCard from "./RecipeCard";
 
 export type SearchStatus = "idle" | "loading" | "success" | "error";
@@ -12,16 +13,22 @@ export type SearchStatus = "idle" | "loading" | "success" | "error";
 interface RecipeResultsProps {
   status: SearchStatus;
   error: string | null;
+  /** False when retrying can't help (e.g. no catalog in this build). */
+  retryable: boolean;
+  /** Ranked by the server; `matches[0]` is the best match. */
   matches: RecipeMatch[];
-  /** Results hidden by the current dietary filters. */
-  hiddenCount: number;
+  /** Matching recipes removed by the current dietary filters. */
+  filteredOutCount: number;
+  /** Recipes in the catalog that were scored. */
+  recipeCount: number;
+  /** Order for the rail; the best match on the plate never moves. */
   sort: SortOrder;
   onSortChange: (sort: SortOrder) => void;
   onRetry: () => void;
   onClearFilters: () => void;
   onOpen: (id: string) => void;
-  queriedIngredients: string[];
-  partial: boolean;
+  /** The board these results were searched with. */
+  board?: PantryIngredient[];
 }
 
 /** Fixed ticket width with a snap point, so the rail scrolls ticket by ticket. */
@@ -58,9 +65,12 @@ function Clip() {
 function OrderRail({
   children,
   count,
+  labelledBy,
 }: {
   children: React.ReactNode;
   count: number;
+  /** id of a visible label for the list; falls back to "Recipe tickets". */
+  labelledBy?: string;
 }) {
   const scroller = useRef<HTMLUListElement>(null);
   const [canPrev, setCanPrev] = useState(false);
@@ -103,7 +113,8 @@ function OrderRail({
       <ul
         ref={scroller}
         onScroll={update}
-        aria-label="Recipe tickets"
+        aria-labelledby={labelledBy}
+        aria-label={labelledBy ? undefined : "Recipe tickets"}
         className="pq-rail-track flex snap-x snap-mandatory gap-6 overflow-x-auto px-1 pb-6 pt-5"
       >
         {children}
@@ -138,8 +149,14 @@ const panel = "pq-panel p-8 text-center font-bold";
 const secondaryButton = "pq-btn pq-btn-secondary mt-4 px-5 py-2 text-sm";
 
 export default function RecipeResults(props: RecipeResultsProps) {
-  const { status, error, matches, hiddenCount, sort } = props;
+  const { status, error, matches, filteredOutCount, sort, board = [] } = props;
   const reduceMotion = useReducedMotion();
+  // matches[0] is served on the plate; sorting only reorders the rail.
+  const best = matches[0];
+  const others = useMemo(
+    () => sortMatches(matches.slice(1), sort),
+    [matches, sort],
+  );
   if (status === "idle") return null;
 
   return (
@@ -153,28 +170,50 @@ export default function RecipeResults(props: RecipeResultsProps) {
           >
             Order up: recipes
           </h2>
-          {status === "success" && props.queriedIngredients.length > 0 && (
+          {status === "success" && props.recipeCount > 0 && (
             <p className="mt-3 text-xs font-medium text-muted">
-              Searched TheMealDB by {props.queriedIngredients.join(", ")}, then
-              scored every candidate against your whole board.
+              Scored all {props.recipeCount} recipes against your board.
+            </p>
+          )}
+          {status === "success" && matches.length > 0 && (
+            <p className="mt-1 text-xs font-medium text-muted">
+              Ranked by how many of your ingredients each recipe uses, then
+              ingredient match, then fewest to buy.
             </p>
           )}
         </div>
-        {status === "success" && matches.length > 1 && (
-          <label className="flex items-center gap-2 text-sm font-bold text-app">
-            Sort by
-            <select
-              value={sort}
-              onChange={(e) => props.onSortChange(e.target.value as SortOrder)}
-              className="rounded-full border-2 border-[var(--pq-ink)] bg-surface px-3 py-1.5 font-bold text-app"
-            >
-              <option value="match">Best match</option>
-              <option value="fewest-missing">Fewest missing</option>
-              <option value="title">Title (A–Z)</option>
-            </select>
-          </label>
-        )}
       </div>
+
+      {status === "success" && best && (
+        <BestMatchPlate match={best} board={board} onOpen={props.onOpen} />
+      )}
+
+      {status === "success" && others.length > 0 && (
+        <div className="flex flex-wrap items-end justify-between gap-3 pt-2">
+          <p
+            id="more-recipes-label"
+            className="text-sm font-bold uppercase tracking-wider text-app"
+          >
+            Also on the menu
+          </p>
+          {others.length > 1 && (
+            <label className="flex items-center gap-2 text-sm font-bold text-app">
+              Sort these by
+              <select
+                value={sort}
+                onChange={(e) =>
+                  props.onSortChange(e.target.value as SortOrder)
+                }
+                className="rounded-full border-2 border-[var(--pq-ink)] bg-surface px-3 py-1.5 font-bold text-app"
+              >
+                <option value="best">Best match</option>
+                <option value="percentage">Highest match %</option>
+                <option value="title">A–Z</option>
+              </select>
+            </label>
+          )}
+        </div>
+      )}
 
       {status === "loading" && (
         <OrderRail count={3}>
@@ -190,27 +229,30 @@ export default function RecipeResults(props: RecipeResultsProps) {
       {status === "error" && (
         <div className={panel}>
           <p className="font-medium text-app">{error}</p>
-          <button
-            type="button"
-            onClick={props.onRetry}
-            className={secondaryButton}
-          >
-            Try again
-          </button>
+          {props.retryable ? (
+            <button
+              type="button"
+              onClick={props.onRetry}
+              className={secondaryButton}
+            >
+              Try again
+            </button>
+          ) : (
+            <p className="mt-1 text-sm text-muted">
+              The recipe catalog is fetched when the site is built, so this
+              won&apos;t fix itself on retry.
+            </p>
+          )}
         </div>
       )}
 
-      {status === "success" && props.partial && (
-        <p className="pq-panel px-4 py-2 text-sm font-medium">
-          Some recipe lookups failed, so these results may be incomplete.
-        </p>
-      )}
-
-      {status === "success" && matches.length === 0 && hiddenCount > 0 && (
+      {status === "success" && matches.length === 0 && filteredOutCount > 0 && (
         <div className={panel}>
-          <p className="font-medium text-app">
-            Your dietary filters hid all {hiddenCount} matching{" "}
-            {hiddenCount === 1 ? "recipe" : "recipes"}.
+          <p className="font-medium text-app">No recipes match these filters</p>
+          <p className="mt-1 text-sm text-muted">
+            {filteredOutCount} matching{" "}
+            {filteredOutCount === 1 ? "recipe was" : "recipes were"} left out by
+            your dietary filters.
           </p>
           <button
             type="button"
@@ -222,48 +264,42 @@ export default function RecipeResults(props: RecipeResultsProps) {
         </div>
       )}
 
-      {status === "success" && matches.length === 0 && hiddenCount === 0 && (
-        <div className={panel}>
-          <p className="font-medium text-app">
-            No recipes found for that combination.
-          </p>
-          <p className="mt-1 text-sm text-muted">
-            Try adding a common ingredient like chicken, rice, or potato.
-          </p>
-        </div>
-      )}
-
-      {status === "success" && matches.length > 0 && (
-        <>
-          {hiddenCount > 0 && (
-            <p className="text-sm text-muted">
-              {hiddenCount} {hiddenCount === 1 ? "recipe" : "recipes"} hidden by
-              dietary filters.
+      {status === "success" &&
+        matches.length === 0 &&
+        filteredOutCount === 0 && (
+          <div className={panel}>
+            <p className="font-medium text-app">
+              No recipes found for that combination.
             </p>
-          )}
-          <OrderRail count={matches.length}>
-            {matches.map((m, i) => (
-              <motion.li
-                key={m.recipe.id}
-                // Tickets drop onto the rail one after another.
-                initial={reduceMotion ? false : { opacity: 0, y: -48 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 380,
-                  damping: 22,
-                  delay: Math.min(i, 6) * 0.06,
-                }}
-                className={`relative flex ${TICKET_CLASS} ${
-                  reduceMotion ? "" : i % 2 ? "rotate-1" : "-rotate-1"
-                }`}
-              >
-                <Clip />
-                <RecipeCard match={m} onOpen={props.onOpen} />
-              </motion.li>
-            ))}
-          </OrderRail>
-        </>
+            <p className="mt-1 text-sm text-muted">
+              Try adding a common ingredient like chicken, rice, or potato.
+            </p>
+          </div>
+        )}
+
+      {status === "success" && others.length > 0 && (
+        <OrderRail count={others.length} labelledBy="more-recipes-label">
+          {others.map((m, i) => (
+            <motion.li
+              key={m.recipe.id}
+              // Tickets drop onto the rail one after another.
+              initial={reduceMotion ? false : { opacity: 0, y: -48 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 380,
+                damping: 22,
+                delay: Math.min(i, 6) * 0.06,
+              }}
+              className={`relative flex ${TICKET_CLASS} ${
+                reduceMotion ? "" : i % 2 ? "rotate-1" : "-rotate-1"
+              }`}
+            >
+              <Clip />
+              <RecipeCard match={m} board={board} onOpen={props.onOpen} />
+            </motion.li>
+          ))}
+        </OrderRail>
       )}
     </section>
   );

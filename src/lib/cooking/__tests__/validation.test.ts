@@ -30,18 +30,14 @@ describe("validateIngredientName", () => {
 });
 
 describe("parseSearchParams", () => {
-  it("parses ingredients, diet, and staples", () => {
+  it("parses ingredients and diet, ignoring the old staples param", () => {
     expect(
       parseSearchParams(
-        qs("ingredients=Rice,eggs,rice&diet=vegan,vegan&staples=1"),
+        qs("ingredients=Rice,eggs,rice&diet=vegan,vegan&staples=0"),
       ),
     ).toEqual({
       ok: true,
-      value: {
-        ingredients: ["Rice", "eggs"],
-        diet: ["vegan"],
-        assumeStaples: true,
-      },
+      value: { ingredients: ["Rice", "eggs"], diet: ["vegan"] },
     });
   });
 

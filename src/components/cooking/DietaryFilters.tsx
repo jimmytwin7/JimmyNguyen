@@ -4,8 +4,6 @@ import type { DietaryFilter } from "@/lib/cooking/types";
 interface DietaryFiltersProps {
   selected: DietaryFilter[];
   onChange: (next: DietaryFilter[]) => void;
-  assumeStaples: boolean;
-  onAssumeStaplesChange: (value: boolean) => void;
 }
 
 const chip =
@@ -14,8 +12,6 @@ const chip =
 export default function DietaryFilters({
   selected,
   onChange,
-  assumeStaples,
-  onAssumeStaplesChange,
 }: DietaryFiltersProps) {
   const toggle = (value: DietaryFilter) =>
     onChange(
@@ -59,21 +55,6 @@ export default function DietaryFilters({
           managing allergies.
         </p>
       </fieldset>
-
-      <label className="flex cursor-pointer items-start gap-3 text-sm font-bold text-app">
-        <input
-          type="checkbox"
-          className="mt-0.5 h-5 w-5 accent-[var(--accent)]"
-          checked={assumeStaples}
-          onChange={(e) => onAssumeStaplesChange(e.target.checked)}
-        />
-        <span>
-          Assume I have salt, pepper &amp; water
-          <span className="block text-xs text-muted">
-            They&apos;re counted as available when scoring.
-          </span>
-        </span>
-      </label>
     </div>
   );
 }

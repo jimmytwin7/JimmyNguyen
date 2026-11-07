@@ -70,7 +70,6 @@ function dedupeNames(names: string[]): string[] {
 export interface RecipeSearchParams {
   ingredients: string[];
   diet: DietaryFilter[];
-  assumeStaples: boolean;
 }
 
 /** Validate `GET /api/recipes` query parameters. */
@@ -102,14 +101,9 @@ export function parseSearchParams(
   const diet = parseDietList(params.get("diet"));
   if (!diet.ok) return diet;
 
-  const staples = params.get("staples");
   return {
     ok: true,
-    value: {
-      ingredients: dedupeNames(names),
-      diet: diet.value,
-      assumeStaples: staples === "1" || staples === "true",
-    },
+    value: { ingredients: dedupeNames(names), diet: diet.value },
   };
 }
 

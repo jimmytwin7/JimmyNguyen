@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  extractMealDbIds,
   normalizeMealDbMeal,
   safeHttpUrl,
   splitInstructions,
@@ -90,15 +89,5 @@ describe("splitInstructions", () => {
 
   it("returns empty for non-strings", () => {
     expect(splitInstructions(undefined)).toEqual([]);
-  });
-});
-
-describe("extractMealDbIds", () => {
-  it("handles null meals and junk", () => {
-    expect(extractMealDbIds({ meals: null })).toEqual([]);
-    expect(
-      extractMealDbIds({ meals: [{ idMeal: "1" }, { idMeal: "x" }, null] }),
-    ).toEqual(["1"]);
-    expect(extractMealDbIds("junk")).toEqual([]);
   });
 });

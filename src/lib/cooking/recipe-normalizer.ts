@@ -59,7 +59,7 @@ function extractIngredients(meal: Record<string, unknown>): RecipeIngredient[] {
   return out;
 }
 
-/** Normalize a full `lookup.php` meal record. Returns null if unusable. */
+/** Normalize a full TheMealDB meal record. Returns null if unusable. */
 export function normalizeMealDbMeal(raw: unknown): Recipe | null {
   if (typeof raw !== "object" || raw === null) return null;
   const meal = raw as Record<string, unknown>;
@@ -80,18 +80,4 @@ export function normalizeMealDbMeal(raw: unknown): Recipe | null {
     instructions: splitInstructions(meal.strInstructions),
     // TheMealDB supplies no prep/cook time or servings; left undefined.
   };
-}
-
-/** Pull candidate ids out of a `filter.php` response. */
-export function extractMealDbIds(raw: unknown): string[] {
-  if (typeof raw !== "object" || raw === null) return [];
-  const meals = (raw as { meals?: unknown }).meals;
-  if (!Array.isArray(meals)) return [];
-  return meals
-    .map((m) =>
-      typeof m === "object" && m !== null
-        ? text((m as Record<string, unknown>).idMeal)
-        : undefined,
-    )
-    .filter((id): id is string => !!id && /^\d+$/.test(id));
 }

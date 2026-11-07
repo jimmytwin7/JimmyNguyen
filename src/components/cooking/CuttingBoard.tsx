@@ -22,6 +22,47 @@ interface CuttingBoardProps {
 /** Marks each sprite so the cook-into-the-pot transition can find it. */
 export const BOARD_SPRITE_ATTR = "data-board-sprite";
 
+/** Staples every search assumes (see PANTRY_STAPLES). */
+const PANTRY_BASICS = ["Salt", "Pepper", "Oil", "Water"];
+
+/**
+ * A quiet strip at the bottom of the board, just above the knife, showing the
+ * always-assumed staples as text chips. Text rather than sprites: the pack has
+ * art for salt only, and three identical "no art" crates read as placeholders.
+ * Not interactive and not counted as board ingredients.
+ */
+function PantryBasics() {
+  return (
+    <div
+      className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border-2 border-dashed px-4 py-3"
+      style={{
+        borderColor: "rgb(91 58 41 / 0.55)",
+        background: "rgb(255 252 245 / 0.55)",
+      }}
+    >
+      <p id="pantry-basics-label" className="text-sm font-bold text-[#3f2a1e]">
+        Pantry basics
+      </p>
+      <span className="rounded-full border-2 border-[var(--pq-ink)] bg-[var(--pq-wood)] px-2 py-px text-xs font-bold text-[#3f2a1e]">
+        Always stocked
+      </span>
+      <ul
+        aria-labelledby="pantry-basics-label"
+        className="flex flex-wrap gap-2"
+      >
+        {PANTRY_BASICS.map((label) => (
+          <li
+            key={label}
+            className="rounded-full border-2 border-[rgb(91_58_41_/_0.5)] bg-[var(--pq-paper)] px-2.5 py-0.5 text-sm font-bold text-[#3f2a1e]"
+          >
+            {label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 /**
  * The cutting board is the stage of the whole game: a big wooden board that
  * holds the ingredient input and the ingredients as stickers. Shelf items can
@@ -109,7 +150,10 @@ export default function CuttingBoard({
             </p>
           </div>
         ) : (
-          <ul className="grid min-h-56 grid-cols-3 content-start gap-x-3 gap-y-5 sm:min-h-72 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
+          <ul
+            aria-label="Ingredients on the board"
+            className="grid min-h-56 grid-cols-3 content-start gap-x-3 gap-y-5 sm:min-h-72 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4"
+          >
             <AnimatePresence initial={false}>
               {pantry.map((item, i) => (
                 <motion.li
@@ -159,7 +203,12 @@ export default function CuttingBoard({
           </ul>
         )}
 
-        {footer}
+        {/* The strip and the knife sit together as the board's bottom edge,
+            rather than the strip floating under the ingredient grid. */}
+        <div className="space-y-3">
+          <PantryBasics />
+          {footer}
+        </div>
       </div>
     </section>
   );

@@ -1,33 +1,19 @@
-import {
-  MAX_DETAIL_LOOKUPS,
-  MAX_PROVIDER_QUERIES,
-  PANTRY_STAPLES,
-} from "../config";
+import { MAX_RESULTS, PANTRY_STAPLES } from "../config";
 import { filterByDiet } from "../dietary-filter";
 import {
   ingredientMatchKey,
   normalizeIngredient,
 } from "../ingredient-normalizer";
-import { scoreRecipe, sortMatches } from "../recipe-matcher";
-import type { PantryIngredient, RecipeSearchResponse } from "../types";
+import { MEALDB_SOURCE_NAME } from "../recipe-normalizer";
+import { compareBestMatch, scoreRecipe } from "../recipe-matcher";
+import type {
+  PantryIngredient,
+  Recipe,
+  RecipeMatch,
+  RecipeSearchResponse,
+} from "../types";
 import type { RecipeSearchParams } from "../validation";
-import { UpstreamError, type RecipeProvider } from "./themealdb";
-
-/**
- * Ingredients so common they make poor search seeds (they appear in hundreds
- * of recipes and say little about the dish). Queried last, if at all.
- */
-const LOW_SIGNAL = new Set([
-  ...PANTRY_STAPLES,
-  "oil",
-  "olive oil",
-  "vegetable oil",
-  "sugar",
-  "butter",
-  "garlic",
-  "onion",
-  "flour",
-]);
+import type { RecipeCatalog } from "./catalog";
 
 export function toPantry(names: string[]): PantryIngredient[] {
   return names.map((name) => {
@@ -36,94 +22,58 @@ export function toPantry(names: string[]): PantryIngredient[] {
   });
 }
 
-/** Pick the most distinctive pantry items to seed the provider queries. */
-export function pickQueryIngredients(
-  names: string[],
-  max = MAX_PROVIDER_QUERIES,
-): string[] {
-  const distinctive = names.filter(
-    (n) => !LOW_SIGNAL.has(ingredientMatchKey(n)),
+/** True if the match uses a board ingredient that isn't an assumed staple. */
+function hasRealMatch(match: RecipeMatch): boolean {
+  return match.matchedIngredients.some(
+    (i) => !PANTRY_STAPLES.has(ingredientMatchKey(i.name)),
   );
-  const common = names.filter((n) => LOW_SIGNAL.has(ingredientMatchKey(n)));
-  return [...distinctive, ...common].slice(0, max);
 }
 
 /**
- * Search → merge → detail → filter → score.
+ * Score the whole catalog against the board. No network calls.
  *
- * 1. Query the provider once per seed ingredient (free tier = one at a time).
- * 2. Merge candidate ids, ranking those that appeared under more seeds first.
- * 3. Fetch details for the top candidates.
- * 4. Apply best-effort dietary filters, then score every recipe locally.
- *
- * Throws UpstreamError only if the provider failed completely; partial
- * failures are reported through `meta.partial`.
+ * 1. Candidates: recipes sharing at least one non-staple match key with the
+ *    board, found through the catalog's inverted index. (Staples are assumed
+ *    for everyone, so they can't make a recipe relevant on their own.)
+ * 2. Apply dietary filters to every candidate.
+ * 3. Score each one with staples assumed.
+ * 4. Keep recipes that match a real (non-staple) board ingredient.
+ * 5. Rank with compareBestMatch and keep the top MAX_RESULTS.
  */
-export async function searchRecipes(
+export function searchRecipes(
   params: RecipeSearchParams,
-  provider: RecipeProvider,
-): Promise<RecipeSearchResponse> {
-  const seeds = pickQueryIngredients(params.ingredients);
-  const seedResults = await Promise.allSettled(
-    seeds.map((s) => provider.findCandidateIds(s)),
-  );
-
-  const fulfilled = seedResults.filter(
-    (r): r is PromiseFulfilledResult<string[]> => r.status === "fulfilled",
-  );
-  if (fulfilled.length === 0) {
-    const first = seedResults[0];
-    throw first?.status === "rejected" && first.reason instanceof UpstreamError
-      ? first.reason
-      : new UpstreamError("network");
-  }
-  let partial = fulfilled.length < seedResults.length;
-
-  // Rank candidates: appearance count desc, then first-seen order.
-  const tally = new Map<string, { count: number; order: number }>();
-  let order = 0;
-  for (const { value } of fulfilled) {
-    for (const id of new Set(value)) {
-      const entry = tally.get(id);
-      if (entry) entry.count += 1;
-      else tally.set(id, { count: 1, order: order++ });
-    }
-  }
-  const candidateIds = [...tally.entries()]
-    .sort((a, b) => b[1].count - a[1].count || a[1].order - b[1].order)
-    .slice(0, MAX_DETAIL_LOOKUPS)
-    .map(([id]) => id);
-
-  const emptyMeta = {
-    provider: provider.name,
-    queriedIngredients: seeds,
-    filteredOutCount: 0,
-    partial,
-  };
-  if (candidateIds.length === 0) return { matches: [], meta: emptyMeta };
-
-  const detailResults = await Promise.allSettled(
-    candidateIds.map((id) => provider.getRecipe(id)),
-  );
-  const recipes = detailResults.flatMap((r) =>
-    r.status === "fulfilled" && r.value ? [r.value] : [],
-  );
-  if (detailResults.every((r) => r.status === "rejected")) {
-    throw new UpstreamError("network");
-  }
-  if (detailResults.some((r) => r.status === "rejected")) partial = true;
-
-  const { kept, removedCount } = filterByDiet(recipes, params.diet);
+  catalog: RecipeCatalog,
+): RecipeSearchResponse {
   const pantry = toPantry(params.ingredients);
-  const matches = sortMatches(
-    kept.map((recipe) =>
-      scoreRecipe(recipe, pantry, { assumeStaples: params.assumeStaples }),
-    ),
-    "match",
+  const boardKeys = new Set(
+    pantry
+      .map((p) => ingredientMatchKey(p.name))
+      .filter((key) => key && !PANTRY_STAPLES.has(key)),
   );
+
+  const candidateIndices = new Set<number>();
+  for (const key of boardKeys) {
+    for (const i of catalog.index.get(key) ?? []) candidateIndices.add(i);
+  }
+  const candidates: Recipe[] = [...candidateIndices]
+    .sort((a, b) => a - b)
+    .map((i) => catalog.recipes[i]);
+
+  const { kept, removedCount } = filterByDiet(candidates, params.diet);
+  const matches = kept
+    .map((recipe) => scoreRecipe(recipe, pantry))
+    .filter(hasRealMatch)
+    .sort(compareBestMatch)
+    .slice(0, MAX_RESULTS);
 
   return {
     matches,
-    meta: { ...emptyMeta, filteredOutCount: removedCount, partial },
+    meta: {
+      provider: MEALDB_SOURCE_NAME,
+      recipeCount: catalog.recipes.length,
+      candidateCount: candidates.length,
+      filteredOutCount: removedCount,
+      catalogDate: catalog.generatedAt,
+    },
   };
 }
