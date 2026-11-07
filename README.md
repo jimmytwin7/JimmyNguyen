@@ -3,7 +3,7 @@
 Personal portfolio site — an experience page, an interactive travel map, and
 **Scrambl**, a recipe finder that matches what's in your kitchen against
 real recipes. Built with Next.js; no database or CMS. Every page is static
-except Scrambl's two small server routes.
+except Scrambl's two small server routes and the optional contact form's route.
 
 **Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 ·
 next-themes (light/dark) · react-simple-maps · Framer Motion · lucide-react
@@ -20,6 +20,17 @@ them are optional (see `.env.example`): Cloudinary credentials only matter for
 re-syncing travel photos ([Photos](#photos-cloudinary--committed-manifest)), and
 `RECIPE_API_KEY` is an optional TheMealDB supporter key that Scrambl's
 build step uses to fetch its recipe catalog.
+
+### Contact form (optional)
+
+The home page shows a contact form only when **all three** server-only values
+are set: `RESEND_API_KEY`, `CONTACT_TO_EMAIL` and `CONTACT_FROM_EMAIL` (a sender
+on a domain you've verified in [Resend](https://resend.com)). Without them the
+form is hidden and the page shows only the LinkedIn and résumé links. The
+check runs at build time, so set the variables in Vercel and redeploy after
+changing them. Spam protection: a hidden honeypot, a signed minimum-fill-time
+token, a per-IP rate limit (3 per 10 minutes, per serverless instance), strict
+validation and a body size cap.
 
 | Script                       | What it does                                         |
 | ---------------------------- | ---------------------------------------------------- |
@@ -169,6 +180,7 @@ src/
     cooking/page.tsx    # Scrambl recipe finder
     api/recipes/        # GET  — score the build-time recipe catalog against the pantry
     api/substitutions/  # POST — dictionary-based substitution ideas
+    api/contact/        # GET token / POST message via Resend (optional)
     not-found.tsx
     globals.css         # Tailwind v4 @theme, semantic tokens, editorial layer,
                         #   .pq-stage and .travel-stage

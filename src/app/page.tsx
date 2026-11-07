@@ -4,11 +4,17 @@ import CurrentlySection from "@/components/home/CurrentlySection";
 import Typewriter from "@/components/home/Typewriter";
 import InterestsBento from "@/components/home/InterestsBento";
 import ProjectPreviews from "@/components/home/ProjectPreviews";
+import ContactForm from "@/components/home/ContactForm";
+import { isContactConfigured } from "@/lib/contact/server/config";
 
 const GITHUB_URL = "https://github.com/jimmytwin7";
 const LINKEDIN_URL = "https://www.linkedin.com/in/jimmytnguyen7";
 
 export default function HomePage() {
+  // Read at build/prerender time: the form exists only when Resend is fully
+  // configured, so it never offers a dead end. Only this boolean is used.
+  const showContactForm = isContactConfigured();
+
   return (
     <>
       {/* ---- Hero: conversational, type-led ---- */}
@@ -134,27 +140,46 @@ export default function HomePage() {
           </h2>
           <span className="editorial-label__rule" aria-hidden="true" />
         </div>
-        <p className="max-w-xl text-lg leading-relaxed text-muted">
-          Open to connecting about engineering, a project idea, or just to say
-          hi. The quickest ways to reach me:
-        </p>
-        <div className="mt-6 flex flex-wrap gap-4">
-          <a
-            href={LINKEDIN_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-line px-5 py-2.5 font-medium text-app transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-          >
-            LinkedIn ↗
-          </a>
-          <a
-            href="/Jimmy_Nguyen_Resume.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-line px-5 py-2.5 font-medium text-app transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-          >
-            Résumé ↗
-          </a>
+        {/* Flex: stacked on mobile; with the form, links left and form right
+            from lg. Without the form, the links keep their own full row. */}
+        <div className="flex flex-col gap-12 lg:flex-row lg:gap-16">
+          <div className={showContactForm ? "lg:w-5/12 lg:shrink-0" : ""}>
+            <p className="max-w-xl text-lg leading-relaxed text-muted">
+              Open to connecting about engineering, a project idea, or just to
+              say hi. The quickest ways to reach me:
+            </p>
+            <div className="mt-6 flex flex-wrap gap-4">
+              <a
+                href={LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg border border-line px-5 py-2.5 font-medium text-app transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              >
+                LinkedIn ↗
+              </a>
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg border border-line px-5 py-2.5 font-medium text-app transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              >
+                GitHub ↗
+              </a>
+              <a
+                href="/Jimmy_Nguyen_Resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg border border-line px-5 py-2.5 font-medium text-app transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              >
+                Résumé ↗
+              </a>
+            </div>
+          </div>
+          {showContactForm && (
+            <div className="min-w-0 border-t border-line pt-10 lg:flex-1 lg:border-l lg:border-t-0 lg:pl-16 lg:pt-0">
+              <ContactForm />
+            </div>
+          )}
         </div>
       </section>
     </>
