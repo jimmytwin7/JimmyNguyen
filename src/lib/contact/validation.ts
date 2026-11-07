@@ -23,12 +23,19 @@ export type ContactErrors = Partial<Record<ContactField, string>>;
 export type ContactParseResult =
   { ok: true; value: ContactInput } | { ok: false; errors: ContactErrors };
 
-// Control characters (including CR/LF) never belong in a name or an address,
-// and keeping them out stops header injection at the source.
-const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
+// Characters that never belong in a name or an address: C0/C1 controls
+// (including CR/LF and DEL), the Unicode line/paragraph separators, and the
+// bidi embedding/override/isolate controls (e.g. U+202E) that can make a
+// subject line or "From:" line read differently than it is. Keeping them out
+// stops header injection and display spoofing at the source.
+const CONTROL_CHARS =
+  /[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/;
 // Deliberately simple: one @, no spaces, a dot in the domain. The real check
 // is whether the mail bounces.
 const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Characters that would let an address carry a display name or a second
+// address once it lands in Reply-To or the body's "From:" line.
+const EMAIL_FORBIDDEN = /[<>()[\]",;:\\]/;
 
 /** Validate untrusted input. Returns trimmed values or per-field errors. */
 export function parseContactInput(input: unknown): ContactParseResult {
@@ -55,6 +62,7 @@ export function parseContactInput(input: unknown): ContactParseResult {
   else if (
     email.length > MAX_EMAIL_LENGTH ||
     CONTROL_CHARS.test(email) ||
+    EMAIL_FORBIDDEN.test(email) ||
     !EMAIL_SHAPE.test(email)
   )
     errors.email = "Enter a valid email address, like name@example.com.";

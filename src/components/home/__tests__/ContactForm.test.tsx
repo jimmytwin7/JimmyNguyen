@@ -52,7 +52,7 @@ describe("ContactForm", () => {
       email: "ada@example.com",
       message: "Hello there, nice portfolio.",
       token: "tok.en",
-      website: "",
+      contact_ref: "",
     });
     expect(screen.getByLabelText("Name")).toHaveValue("");
   });
@@ -124,7 +124,7 @@ describe("ContactForm", () => {
 
   it("hides the honeypot from assistive tech and the tab order", () => {
     render(<ContactForm />);
-    const trap = document.getElementById("contact-website")!;
+    const trap = document.getElementById("contact-ref")!;
     expect(trap).toHaveAttribute("tabindex", "-1");
     expect(trap.closest("[aria-hidden='true']")).not.toBeNull();
   });

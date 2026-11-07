@@ -96,7 +96,7 @@ export default function ContactForm() {
         body: JSON.stringify({
           ...parsed.value,
           token: token.current,
-          website: honeypot,
+          contact_ref: honeypot,
         }),
       });
 
@@ -228,10 +228,10 @@ export default function ContactForm() {
           aria-hidden="true"
           className="absolute -left-[9999px] h-px w-px overflow-hidden"
         >
-          <label htmlFor="contact-website">Website</label>
+          <label htmlFor="contact-ref">Leave this field empty</label>
           <input
-            id="contact-website"
-            name="website"
+            id="contact-ref"
+            name="contact_ref"
             type="text"
             tabIndex={-1}
             autoComplete="off"

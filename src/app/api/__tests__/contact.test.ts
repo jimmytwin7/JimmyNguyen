@@ -23,7 +23,7 @@ const valid = () => ({
   email: "ada@example.com",
   message: "Hello there, I liked your portfolio.",
   token: aged(),
-  website: "",
+  contact_ref: "",
 });
 
 const post = (body: unknown, opts: { ip?: string; raw?: string } = {}) =>
@@ -86,7 +86,7 @@ describe("POST /api/contact", () => {
   });
 
   it("silently drops honeypot submissions", async () => {
-    const res = await post({ ...valid(), website: "http://spam.example" });
+    const res = await post({ ...valid(), contact_ref: "http://spam.example" });
     expect(res.status).toBe(200);
     expect(send).not.toHaveBeenCalled();
   });

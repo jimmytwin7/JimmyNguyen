@@ -10,7 +10,8 @@ import {
 /**
  * GET  /api/contact -> { token }  A signed "form opened" timestamp.
  * POST /api/contact
- * Body: { name, email, message, token, website }  (`website` is the honeypot)
+ * Body: { name, email, message, token, contact_ref }  (`contact_ref` is the
+ * honeypot; the name is deliberately non-semantic so browsers don't autofill it)
  *
  * 200 { ok: true } | 400 invalid body, fields or token | 413 too large
  * | 429 rate limited | 502 send failed | 503 not configured.
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
 
   // Honeypot: real visitors never see or fill this field. Pretend it worked so
   // the bot learns nothing, and send nothing.
-  if (typeof body.website === "string" && body.website.trim() !== "") {
+  if (typeof body.contact_ref === "string" && body.contact_ref.trim() !== "") {
     return json({ ok: true });
   }
 

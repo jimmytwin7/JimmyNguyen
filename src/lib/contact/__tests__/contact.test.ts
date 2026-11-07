@@ -56,8 +56,44 @@ describe("parseContactInput", () => {
     }
   });
 
-  it("rejects control characters in the name", () => {
-    expect(parseContactInput({ ...good, name: "Ada\nBcc: x" }).ok).toBe(false);
+  it("rejects emails that could carry a display name or second address", () => {
+    for (const email of [
+      '"x"<a@b.com>',
+      "Name<a@b.com>",
+      "a@b.com,c",
+      "a@b.com;c",
+      "a(b)@c.com",
+      "a@[1.2.3.4]",
+      "a\\@b.com",
+      "a@b.com:c",
+      "a@b.com>",
+      "a@b.c\u202eom",
+    ]) {
+      expect(parseContactInput({ ...good, email }).ok, email).toBe(false);
+    }
+  });
+
+  it("accepts ordinary real-world emails", () => {
+    for (const email of [
+      "ada+tag@example.co.uk",
+      "o'brien@example.com",
+      "first.last@sub-domain.example.com",
+    ]) {
+      expect(parseContactInput({ ...good, email }).ok, email).toBe(true);
+    }
+  });
+
+  it("rejects control, separator and bidi characters in the name", () => {
+    for (const ch of ["\n", "\u202e", "\u2028", "\u2029", "\u0085", "\u2066"]) {
+      const r = parseContactInput({ ...good, name: `Ada${ch}Lovelace` });
+      expect(r.ok, JSON.stringify(ch)).toBe(false);
+    }
+  });
+
+  it("accepts non-ASCII letters in the name", () => {
+    for (const name of ["José Núñez", "李雷", "Zoë O'Neil-Smith"]) {
+      expect(parseContactInput({ ...good, name }).ok, name).toBe(true);
+    }
   });
 
   it("enforces length limits", () => {
